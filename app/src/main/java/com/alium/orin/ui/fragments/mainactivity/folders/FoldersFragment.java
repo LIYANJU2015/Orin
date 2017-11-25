@@ -310,7 +310,7 @@ public class FoldersFragment extends AbsMainActivityFragment implements MainActi
                     File file = (File) extra;
                     int startIndex = -1;
                     for (int i = 0; i < songs.size(); i++) {
-                        if (file.getPath().equals(songs.get(i).data)) { // path is already canonical here
+                        if (file.getPath().equals(songs.get(i).getPath())) { // path is already canonical here
                             startIndex = i;
                             break;
                         }

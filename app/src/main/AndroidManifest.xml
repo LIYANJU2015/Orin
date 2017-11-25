@@ -22,7 +22,8 @@
         android:theme="@style/Theme.Phonograph.Light"
         tools:ignore="UnusedAttribute">
 
-        <activity android:name="com.alium.orin.ui.activities.MainActivity">
+        <activity android:name="com.alium.orin.ui.activities.MainActivity"
+            android:theme="@style/Theme.Phonograph.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.MUSIC_PLAYER" />

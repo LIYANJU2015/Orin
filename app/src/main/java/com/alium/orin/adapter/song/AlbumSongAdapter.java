@@ -43,7 +43,7 @@ public class AlbumSongAdapter extends SongAdapter {
 
     @Override
     protected String getSongText(Song song) {
-        return MusicUtil.getReadableDurationString(song.duration);
+        return MusicUtil.getReadableDurationString(song.getDuration());
     }
 
     public class ViewHolder extends SongAdapter.ViewHolder {

@@ -85,6 +85,9 @@ public abstract class AbsMusicServiceActivity extends AbsBaseActivity implements
             filter.addAction(MusicService.META_CHANGED);
             filter.addAction(MusicService.QUEUE_CHANGED);
             filter.addAction(MusicService.MEDIA_STORE_CHANGED);
+            filter.addAction(MusicService.PLAY_ERROR_STATUS);
+            filter.addAction(MusicService.PLAYER_END_PREPARE);
+            filter.addAction(MusicService.PLAYER_START_PREPARE);
 
             registerReceiver(musicStateReceiver, filter);
 
@@ -166,6 +169,33 @@ public abstract class AbsMusicServiceActivity extends AbsBaseActivity implements
         }
     }
 
+    @Override
+    public void onPlayerEndPrepered() {
+        for (MusicServiceEventListener listener : mMusicServiceEventListeners) {
+            if (listener != null) {
+                listener.onPlayerEndPrepered();
+            }
+        }
+    }
+
+    @Override
+    public void onPlayError() {
+        for (MusicServiceEventListener listener : mMusicServiceEventListeners) {
+            if (listener != null) {
+                listener.onPlayError();
+            }
+        }
+    }
+
+    @Override
+    public void onPlayerStartPreper() {
+        for (MusicServiceEventListener listener : mMusicServiceEventListeners) {
+            if (listener != null) {
+                listener.onPlayerStartPreper();
+            }
+        }
+    }
+
     private static final class MusicStateReceiver extends BroadcastReceiver {
 
         private final WeakReference<AbsMusicServiceActivity> reference;
@@ -197,6 +227,15 @@ public abstract class AbsMusicServiceActivity extends AbsBaseActivity implements
                         break;
                     case MusicService.MEDIA_STORE_CHANGED:
                         activity.onMediaStoreChanged();
+                        break;
+                    case MusicService.PLAY_ERROR_STATUS:
+                        activity.onPlayError();
+                        break;
+                    case MusicService.PLAYER_END_PREPARE:
+                        activity.onPlayerEndPrepered();
+                        break;
+                    case MusicService.PLAYER_START_PREPARE:
+                        activity.onPlayerStartPreper();
                         break;
                 }
             }

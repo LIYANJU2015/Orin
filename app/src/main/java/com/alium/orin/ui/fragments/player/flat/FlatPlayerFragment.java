@@ -300,6 +300,9 @@ public class FlatPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
     private void updateLyrics() {
         if (updateLyricsAsyncTask != null) updateLyricsAsyncTask.cancel(false);
         final Song song = MusicPlayerRemote.getCurrentSong();
+        if (!song.isLocalSong()) {
+            return;
+        }
         updateLyricsAsyncTask = new AsyncTask<Void, Void, String>() {
             @Override
             protected void onPreExecute() {
@@ -311,7 +314,7 @@ public class FlatPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
             @Override
             protected String doInBackground(Void... params) {
                 try {
-                    return AudioFileIO.read(new File(song.data)).getTagOrCreateDefault().getFirst(FieldKey.LYRICS);
+                    return AudioFileIO.read(new File(song.getPath())).getTagOrCreateDefault().getFirst(FieldKey.LYRICS);
                 } catch (Exception e) {
                     e.printStackTrace();
                     cancel(false);

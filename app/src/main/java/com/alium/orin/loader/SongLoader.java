@@ -9,6 +9,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.alium.orin.model.Song;
+import com.alium.orin.provider.MusicPlaybackQueueStore;
+import com.alium.orin.soundcloud.HomeSound;
 import com.alium.orin.util.PreferenceUtil;
 
 import java.util.ArrayList;
@@ -67,6 +69,12 @@ public class SongLoader {
 
     @NonNull
     private static Song getSongFromCursorImpl(@NonNull Cursor cursor) {
+        int index = cursor.getColumnIndex(MusicPlaybackQueueStore.IS_LOCAL);
+        boolean isLocal = true;
+        if (index != -1) {
+            isLocal = cursor.getInt(index) == 1;
+        }
+
         final int id = cursor.getInt(0);
         final String title = cursor.getString(1);
         final int trackNumber = cursor.getInt(2);
@@ -79,7 +87,19 @@ public class SongLoader {
         final int artistId = cursor.getInt(9);
         final String artistName = cursor.getString(10);
 
-        return new Song(id, title, trackNumber, year, duration, data, dateModified, albumId, albumName, artistId, artistName);
+        if (isLocal) {
+            return new Song(id, title, trackNumber, year, duration, data, dateModified, albumId, albumName, artistId, artistName);
+        } else {
+            String albumImage = cursor.getString(cursor.getColumnIndexOrThrow(MusicPlaybackQueueStore.ALBUM_IMAGE));
+            String songPlayTime = cursor.getString(cursor.getColumnIndexOrThrow(MusicPlaybackQueueStore.SONG_PLAY_TIME));
+            String downloadUrl = cursor.getString(cursor.getColumnIndexOrThrow(MusicPlaybackQueueStore.SONG_DOWNLOAD_URL));
+            HomeSound.ContentsBeanX.ContentsBean contentsBean = new HomeSound.ContentsBeanX.ContentsBean(id, title, trackNumber, year,
+                    duration, data, dateModified, albumId, albumName, artistId, artistName);
+            contentsBean.album_images = albumImage;
+            contentsBean.song_play_time = songPlayTime;
+            contentsBean.song_download_url = downloadUrl;
+            return contentsBean;
+        }
     }
 
     @Nullable

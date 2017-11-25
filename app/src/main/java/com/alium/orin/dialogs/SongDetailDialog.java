@@ -85,7 +85,7 @@ public class SongDetailDialog extends DialogFragment {
 
         try {
             if (song != null) {
-                final File songFile = new File(song.data);
+                final File songFile = new File(song.getPath());
                 if (songFile.exists()) {
                     AudioFile audioFile = AudioFileIO.read(songFile);
                     AudioHeader audioHeader = audioFile.getAudioHeader();

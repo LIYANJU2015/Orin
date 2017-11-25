@@ -14,15 +14,16 @@ import android.widget.Toast;
 
 import com.alium.orin.R;
 import com.alium.orin.service.playback.Playback;
+import com.alium.orin.util.LogUtil;
 import com.alium.orin.util.PreferenceUtil;
 
 /**
  * @author Andrew Neal, Karim Abou Zeid (kabouzeid)
  */
-public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
+public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener {
     public static final String TAG = MultiPlayer.class.getSimpleName();
 
-    private MediaPlayer mCurrentMediaPlayer = new MediaPlayer();
+    private volatile MediaPlayer mCurrentMediaPlayer = new MediaPlayer();
     private MediaPlayer mNextMediaPlayer;
 
     private Context context;
@@ -55,6 +56,8 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
         return mIsInitialized;
     }
 
+    private volatile boolean isPrepared = false;
+
     /**
      * @param player The {@link MediaPlayer} to use
      * @param path   The path of the file, or the http/rtsp URL of the stream
@@ -67,6 +70,7 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
             return false;
         }
         try {
+            isPrepared = false;
             player.reset();
             player.setOnPreparedListener(null);
             if (path.startsWith("content://")) {
@@ -76,9 +80,15 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
             }
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
             player.prepare();
+            isPrepared = true;
         } catch (Exception e) {
+            e.printStackTrace();
+            if (callbacks != null) {
+                callbacks.onError();
+            }
             return false;
         }
+        player.setOnPreparedListener(this);
         player.setOnCompletionListener(this);
         player.setOnErrorListener(this);
         final Intent intent = new Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
@@ -87,6 +97,11 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
         intent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
         context.sendBroadcast(intent);
         return true;
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+
     }
 
     /**
@@ -164,7 +179,9 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
         try {
             mCurrentMediaPlayer.start();
             return true;
+
         } catch (IllegalStateException e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -174,8 +191,28 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public void stop() {
-        mCurrentMediaPlayer.reset();
+        if (mCurrentMediaPlayer != null) {
+            mCurrentMediaPlayer.reset();
+        }
         mIsInitialized = false;
+    }
+
+    public void stopPrepareBlock() {
+        LogUtil.v(TAG, "stopPrepareBlock isPrepared " + isPrepared);
+        if (!isPrepared) {
+            if (mCurrentMediaPlayer != null) {
+                mCurrentMediaPlayer.stop();
+                mCurrentMediaPlayer.release();
+                mCurrentMediaPlayer = null;
+                mCurrentMediaPlayer = new MediaPlayer();
+            }
+
+            if (mNextMediaPlayer != null) {
+                mNextMediaPlayer.stop();
+                mNextMediaPlayer.release();
+                mNextMediaPlayer = null;
+            }
+        }
     }
 
     /**
@@ -183,11 +220,11 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public void release() {
-        stop();
-        mCurrentMediaPlayer.release();
-        if (mNextMediaPlayer != null) {
-            mNextMediaPlayer.release();
-        }
+            stop();
+            mCurrentMediaPlayer.release();
+            if (mNextMediaPlayer != null) {
+                mNextMediaPlayer.release();
+            }
     }
 
     /**
@@ -196,11 +233,15 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
     @Override
     public boolean pause() {
         try {
+
             mCurrentMediaPlayer.pause();
             return true;
+
         } catch (IllegalStateException e) {
+            e.printStackTrace();
             return false;
         }
+
     }
 
     /**
@@ -254,9 +295,12 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
     @Override
     public int seek(final int whereto) {
         try {
+
             mCurrentMediaPlayer.seekTo(whereto);
             return whereto;
+
         } catch (IllegalStateException e) {
+            e.printStackTrace();
             return -1;
         }
     }
@@ -267,6 +311,7 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
             mCurrentMediaPlayer.setVolume(vol, vol);
             return true;
         } catch (IllegalStateException e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -282,6 +327,7 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
             mCurrentMediaPlayer.setAudioSessionId(sessionId);
             return true;
         } catch (@NonNull IllegalArgumentException | IllegalStateException e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -307,6 +353,9 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
         mCurrentMediaPlayer.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
         if (context != null) {
             Toast.makeText(context, context.getResources().getString(R.string.unplayable_file), Toast.LENGTH_SHORT).show();
+        }
+        if (callbacks != null) {
+            callbacks.onError();
         }
         return false;
     }

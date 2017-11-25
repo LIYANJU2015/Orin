@@ -19,4 +19,10 @@ public interface MusicServiceEventListener {
     void onShuffleModeChanged();
 
     void onMediaStoreChanged();
+
+    void onPlayError();
+
+    void onPlayerEndPrepered();
+
+    void onPlayerStartPreper();
 }

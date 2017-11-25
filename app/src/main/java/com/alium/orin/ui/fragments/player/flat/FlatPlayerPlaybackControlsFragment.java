@@ -19,9 +19,12 @@ import com.alium.orin.helper.MusicPlayerRemote;
 import com.alium.orin.helper.MusicProgressViewUpdateHelper;
 import com.alium.orin.helper.PlayPauseButtonOnClickHandler;
 import com.alium.orin.misc.SimpleOnSeekbarChangeListener;
+import com.alium.orin.model.Song;
 import com.alium.orin.service.MusicService;
 import com.alium.orin.ui.fragments.AbsMusicServiceFragment;
+import com.alium.orin.util.LogUtil;
 import com.alium.orin.util.MusicUtil;
+import com.alium.orin.views.LoadingProgressBar;
 import com.alium.orin.views.PlayPauseDrawable;
 import com.kabouzeid.appthemehelper.util.MaterialValueHelper;
 import com.alium.orin.R;
@@ -57,6 +60,8 @@ public class FlatPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
     TextView songTotalTime;
     @BindView(R.id.player_song_current_progress)
     TextView songCurrentProgress;
+    @BindView(R.id.loading_pb)
+    LoadingProgressBar loadingPB;
 
     private PlayPauseDrawable playPauseDrawable;
 
@@ -66,6 +71,8 @@ public class FlatPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
     private MusicProgressViewUpdateHelper progressViewUpdateHelper;
 
     private AnimatorSet musicControllerAnimationSet;
+
+    private boolean isShowLoading;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,6 +84,50 @@ public class FlatPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_flat_player_playback_controls, container, false);
+    }
+
+    @Override
+    public void onPlayingMetaChanged() {
+        super.onPlayingMetaChanged();
+        LogUtil.v("flatplayer", "onPlayingMetaChanged");
+        isShowLoading = !MusicPlayerRemote.getCurrentSong().isLocalSong();
+        playPauseButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onPlayerStartPreper() {
+        super.onPlayerStartPreper();
+        LogUtil.v("flatplayer", "onPlayerStartPreper");
+        if (!MusicPlayerRemote.getCurrentSong().isLocalSong()) {
+            isShowLoading = true;
+            loadingPB.setVisibility(View.VISIBLE);
+            playPauseButton.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
+    public void onPlayerEndPrepered() {
+        super.onPlayerEndPrepered();
+        LogUtil.v("flatplayer", "onPlayerEndPrepered");
+        isShowLoading = false;
+        loadingPB.getHandler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                loadingPB.setVisibility(View.INVISIBLE);
+            }
+        }, 500);
+
+        playPauseButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onPlayError() {
+        super.onPlayError();
+        LogUtil.v("cardplayer", "onPlayError");
+        isShowLoading = false;
+        loadingPB.setVisibility(View.INVISIBLE);
+        playPauseDrawable.setPlay(true);
+        playPauseButton.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -160,9 +211,18 @@ public class FlatPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
     }
 
     protected void updatePlayPauseDrawableState(boolean animate) {
+        Song song = MusicPlayerRemote.getCurrentSong();
         if (MusicPlayerRemote.isPlaying()) {
+            if (!song.isLocalSong() && isShowLoading) {
+                loadingPB.setVisibility(View.VISIBLE);
+            } else {
+                loadingPB.setVisibility(View.INVISIBLE);
+            }
             playPauseDrawable.setPause(animate);
         } else {
+            if (!song.isLocalSong()) {
+                loadingPB.setVisibility(View.INVISIBLE);
+            }
             playPauseDrawable.setPlay(animate);
         }
     }

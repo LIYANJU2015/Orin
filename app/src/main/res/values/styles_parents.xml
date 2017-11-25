@@ -32,6 +32,10 @@
 
     <style name="Theme.Phonograph.Base.Light" parent="Theme.AppCompat.Light.NoActionBar">
 
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
         <item name="android:windowActionBarOverlay">true</item>
         <item name="windowActionBarOverlay">true</item>
 
@@ -51,7 +55,7 @@
         <item name="toolbarPopupTheme">@style/ThemeOverlay.AppCompat.Light</item>
 
         <!-- just in case-->
-        <item name="colorAccent">@android:color/black</item>
+       <!-- <item name="colorAccent">@android:color/black</item>-->
 
         <!-- necessary to find the overflow button later in the layout-->
         <item name="android:actionOverflowButtonStyle">@style/Widget.ActionButton.Overflow</item>

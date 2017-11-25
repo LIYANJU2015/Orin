@@ -18,6 +18,7 @@ import android.util.Property;
 import android.view.animation.DecelerateInterpolator;
 
 import com.alium.orin.R;
+import com.alium.orin.misc.SimpleAnimatorListener;
 
 public class PlayPauseDrawable extends Drawable {
     private static final long PLAY_PAUSE_ANIMATION_DURATION = 250;

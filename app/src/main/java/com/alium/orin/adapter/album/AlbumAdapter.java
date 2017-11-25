@@ -61,6 +61,11 @@ public class AlbumAdapter extends AbsMultiSelectAdapter<AlbumAdapter.ViewHolder,
 
     protected boolean usePalette = false;
 
+    @Override
+    public void onPlayerStartPreper() {
+
+    }
+
     public AlbumAdapter(@NonNull AppCompatActivity activity, ArrayList<Album> dataSet, @LayoutRes int itemLayoutRes, boolean usePalette, @Nullable CabHolder cabHolder) {
         super(activity, cabHolder, R.menu.menu_media_selection);
         this.activity = activity;
@@ -71,6 +76,10 @@ public class AlbumAdapter extends AbsMultiSelectAdapter<AlbumAdapter.ViewHolder,
         setHasStableIds(true);
     }
 
+    @Override
+    public void onPlayerEndPrepered() {
+
+    }
 
     private String getSection(String albumTitle) {
         Character character = albumTitle.toCharArray()[0];
@@ -334,6 +343,11 @@ public class AlbumAdapter extends AbsMultiSelectAdapter<AlbumAdapter.ViewHolder,
 
     @Override
     public void onServiceConnected() {
+
+    }
+
+    @Override
+    public void onPlayError() {
 
     }
 

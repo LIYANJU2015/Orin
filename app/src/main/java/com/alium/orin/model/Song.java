@@ -3,23 +3,42 @@ package com.alium.orin.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * @author Karim Abou Zeid (kabouzeid)
  */
 public class Song implements Parcelable {
     public static final Song EMPTY_SONG = new Song(-1, "", -1, -1, -1, "", -1, -1, "", -1, "");
 
-    public final int id;
-    public final String title;
-    public final int trackNumber;
-    public final int year;
-    public final long duration;
-    public final String data;
-    public final long dateModified;
-    public final int albumId;
-    public final String albumName;
-    public final int artistId;
-    public final String artistName;
+    public int id;
+
+    @SerializedName("song_name")
+    public String title;
+    public int trackNumber;
+    public int year;
+
+    private long duration;
+
+    private String data;
+
+    @SerializedName("update_time_in_mills")
+    public long dateModified;
+    public int albumId;
+
+    @SerializedName("album_name")
+    public String albumName;
+
+    public int artistId;
+    @SerializedName("singer")
+    public String artistName;
+
+    public String getPath() {
+        return data;
+    }
+
+    public Song(){
+    }
 
     public Song(int id, String title, int trackNumber, int year, long duration, String data, long dateModified, int albumId, String albumName, int artistId, String artistName) {
         this.id = id;
@@ -134,4 +153,24 @@ public class Song implements Parcelable {
             return new Song[size];
         }
     };
+
+    public String getAlbum_images() {
+        return "";
+    }
+
+    public int getPosition() {
+        return 0;
+    }
+
+    public String getStreamUrl() {
+        return "";
+    }
+
+    public boolean isLocalSong() {
+        return true;
+    }
+
+    public long getDuration() {
+        return duration;
+    }
 }

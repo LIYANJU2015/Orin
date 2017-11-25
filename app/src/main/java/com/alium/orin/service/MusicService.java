@@ -34,32 +34,34 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.widget.Toast;
 
+import com.alium.orin.R;
 import com.alium.orin.appwidgets.AppWidgetBig;
+import com.alium.orin.appwidgets.AppWidgetClassic;
 import com.alium.orin.appwidgets.AppWidgetSmall;
+import com.alium.orin.glide.BlurTransformation;
 import com.alium.orin.glide.SongGlideRequest;
+import com.alium.orin.helper.ShuffleHelper;
+import com.alium.orin.helper.StopWatch;
 import com.alium.orin.loader.PlaylistSongLoader;
+import com.alium.orin.model.AbsCustomPlaylist;
 import com.alium.orin.model.Playlist;
 import com.alium.orin.model.Song;
+import com.alium.orin.provider.HistoryStore;
 import com.alium.orin.provider.MusicPlaybackQueueStore;
 import com.alium.orin.provider.SongPlayCountStore;
+import com.alium.orin.service.notification.PlayingNotification;
+import com.alium.orin.service.notification.PlayingNotificationImpl;
+import com.alium.orin.service.notification.PlayingNotificationImpl24;
 import com.alium.orin.service.playback.Playback;
+import com.alium.orin.soundcloud.SoundCloundClient;
+import com.alium.orin.util.LogUtil;
 import com.alium.orin.util.MusicUtil;
 import com.alium.orin.util.PreferenceUtil;
+import com.alium.orin.util.Util;
 import com.bumptech.glide.BitmapRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
-import com.alium.orin.R;
-import com.alium.orin.appwidgets.AppWidgetClassic;
-import com.alium.orin.glide.BlurTransformation;
-import com.alium.orin.helper.ShuffleHelper;
-import com.alium.orin.helper.StopWatch;
-import com.alium.orin.model.AbsCustomPlaylist;
-import com.alium.orin.provider.HistoryStore;
-import com.alium.orin.service.notification.PlayingNotification;
-import com.alium.orin.service.notification.PlayingNotificationImpl;
-import com.alium.orin.service.notification.PlayingNotificationImpl24;
-import com.alium.orin.util.Util;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -93,10 +95,13 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
     public static final String META_CHANGED = PHONOGRAPH_PACKAGE_NAME + ".metachanged";
     public static final String QUEUE_CHANGED = PHONOGRAPH_PACKAGE_NAME + ".queuechanged";
     public static final String PLAY_STATE_CHANGED = PHONOGRAPH_PACKAGE_NAME + ".playstatechanged";
+    public static final String PLAY_ERROR_STATUS = PHONOGRAPH_PACKAGE_NAME + ".playError";
 
     public static final String REPEAT_MODE_CHANGED = PHONOGRAPH_PACKAGE_NAME + ".repeatmodechanged";
     public static final String SHUFFLE_MODE_CHANGED = PHONOGRAPH_PACKAGE_NAME + ".shufflemodechanged";
     public static final String MEDIA_STORE_CHANGED = PHONOGRAPH_PACKAGE_NAME + ".mediastorechanged";
+    public static final String PLAYER_END_PREPARE = PHONOGRAPH_PACKAGE_NAME + ".player_prepare";
+    public static final String PLAYER_START_PREPARE = PHONOGRAPH_PACKAGE_NAME + ".start_player_prepare";
 
     public static final String SAVED_POSITION = "POSITION";
     public static final String SAVED_POSITION_IN_TRACK = "POSITION_IN_TRACK";
@@ -172,7 +177,14 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
     private Handler uiThreadHandler;
 
     private static String getTrackUri(@NonNull Song song) {
-        return MusicUtil.getSongFileUri(song.id).toString();
+        String url;
+        if (song.isLocalSong()) {
+            url = MusicUtil.getSongFileUri(song.id).toString();
+        } else {
+            url = song.getStreamUrl() + "?client_id=" + SoundCloundClient.CLIENT_ID;
+        }
+        LogUtil.v(TAG, " >>getTrackUri url " + url);
+        return url;
     }
 
     @Override
@@ -445,7 +457,11 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
                 this.playingQueue = restoredQueue;
 
                 position = restoredPosition;
-                openCurrent();
+
+                notifyChange(PLAYER_START_PREPARE);
+                if (openCurrent()) {
+                    notifyChange(PLAYER_END_PREPARE);
+                }
                 prepareNext();
 
                 if (restoredPositionInTrack > 0) seek(restoredPositionInTrack);
@@ -503,20 +519,36 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
     }
 
     private boolean openTrackAndPrepareNextAt(int position) {
+        LogUtil.v(TAG, "openTrackAndPrepareNextAt start ");
         synchronized (this) {
             this.position = position;
-            boolean prepared = openCurrent();
-            if (prepared) prepareNextImpl();
-            notifyChange(META_CHANGED);
+            Song song = getCurrentSong();
+            boolean prepared;
+            if (song.isLocalSong()) {
+                prepared = openCurrent();
+                if (prepared) prepareNextImpl();
+                notifyChange(META_CHANGED);
+            } else {
+                notifyChange(META_CHANGED);
+                notifyChange(PLAYER_START_PREPARE);
+                prepared = openCurrent();
+                if (prepared) {
+                    prepareNextImpl();
+                    notifyChange(PLAYER_END_PREPARE);
+                }
+            }
             notHandledMetaChangedForCurrentTrack = false;
+            LogUtil.v(TAG, "openTrackAndPrepareNextAt end ");
             return prepared;
         }
     }
 
     private boolean openCurrent() {
         synchronized (this) {
+            boolean isPre;
             try {
-                return playback.setDataSource(getTrackUri(getCurrentSong()));
+                isPre = playback.setDataSource(getTrackUri(getCurrentSong()));
+                return isPre;
             } catch (Exception e) {
                 return false;
             }
@@ -589,7 +621,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
                 .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, song.artistName)
                 .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, song.albumName)
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.title)
-                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, song.duration)
+                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, song.getDuration())
                 .putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, getPosition() + 1)
                 .putLong(MediaMetadataCompat.METADATA_KEY_YEAR, song.year)
                 .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, null);
@@ -826,6 +858,8 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
 
     public void playSongAt(final int position) {
         // handle this on the handlers thread to avoid blocking the ui thread
+        LogUtil.v(TAG, "playSongAt position " + position);
+        playback.stopPrepareBlock();
         playerHandler.removeMessages(PLAY_SONG);
         playerHandler.obtainMessage(PLAY_SONG, position, 0).sendToTarget();
     }
@@ -860,6 +894,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
                         playSongAt(getPosition());
                     } else {
                         playback.start();
+                        notifyChange(PLAYER_END_PREPARE);
                         if (!becomingNoisyReceiverRegistered) {
                             registerReceiver(becomingNoisyReceiver, becomingNoisyReceiverIntentFilter);
                             becomingNoisyReceiverRegistered = true;
@@ -949,7 +984,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
     public long getQueueDurationMillis(int position) {
         long duration = 0;
         for (int i = position + 1; i < playingQueue.size(); i++)
-            duration += playingQueue.get(i).duration;
+            duration += playingQueue.get(i).getDuration();
         return duration;
     }
 
@@ -1040,7 +1075,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
         intent.putExtra("album", song.albumName);
         intent.putExtra("track", song.title);
 
-        intent.putExtra("duration", song.duration);
+        intent.putExtra("duration", song.getDuration());
         intent.putExtra("position", (long) getSongProgressMillis());
 
         intent.putExtra("playing", isPlaying());
@@ -1358,7 +1393,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
         }
 
         boolean shouldBumpPlayCount() {
-            return song.duration * 0.5d < stopWatch.getElapsedTime();
+            return song.getDuration() * 0.5d < stopWatch.getElapsedTime();
         }
 
         void notifySongChanged(Song song) {
@@ -1377,5 +1412,11 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
                 }
             }
         }
+    }
+
+    @Override
+    public void onError() {
+        LogUtil.v(TAG, "Music player error !!!");
+        handleAndSendChangeInternal(PLAY_ERROR_STATUS);
     }
 }

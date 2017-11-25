@@ -7,6 +7,7 @@ import android.view.View;
 
 import com.alium.orin.interfaces.MusicServiceEventListener;
 import com.alium.orin.ui.activities.base.AbsMusicServiceActivity;
+import com.alium.orin.util.LogUtil;
 
 /**
  * @author Karim Abou Zeid (kabouzeid)
@@ -14,10 +15,13 @@ import com.alium.orin.ui.activities.base.AbsMusicServiceActivity;
 public class AbsMusicServiceFragment extends Fragment implements MusicServiceEventListener {
     private AbsMusicServiceActivity activity;
 
+    protected Context mContext;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
+            mContext = context;
             activity = (AbsMusicServiceActivity) context;
         } catch (ClassCastException e) {
             throw new RuntimeException(context.getClass().getSimpleName() + " must be an instance of " + AbsMusicServiceActivity.class.getSimpleName());
@@ -44,41 +48,56 @@ public class AbsMusicServiceFragment extends Fragment implements MusicServiceEve
 
     @Override
     public void onPlayingMetaChanged() {
-
+        LogUtil.v("Player", "onPlayingMetaChanged");
     }
 
     @Override
     public void onServiceConnected() {
-
+        LogUtil.v("Player", "onServiceConnected");
     }
 
     @Override
     public void onServiceDisconnected() {
-
+        LogUtil.v("Player", "onServiceDisconnected");
     }
 
     @Override
     public void onQueueChanged() {
-
+        LogUtil.v("Player", "onQueueChanged");
     }
 
     @Override
     public void onPlayStateChanged() {
-
+        LogUtil.v("Player", "onPlayStateChanged");
     }
 
     @Override
     public void onRepeatModeChanged() {
-
+        LogUtil.v("Player", "onRepeatModeChanged");
     }
 
     @Override
     public void onShuffleModeChanged() {
-
+        LogUtil.v("Player", "onShuffleModeChanged");
     }
 
     @Override
     public void onMediaStoreChanged() {
+        LogUtil.v("Player", "onMediaStoreChanged");
+    }
+
+    @Override
+    public void onPlayError() {
+
+    }
+
+    @Override
+    public void onPlayerEndPrepered() {
+        LogUtil.v("Player", "onPlayerEndPrepered >>");
+    }
+
+    @Override
+    public void onPlayerStartPreper() {
 
     }
 }

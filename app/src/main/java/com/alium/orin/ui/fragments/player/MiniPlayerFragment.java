@@ -16,7 +16,9 @@ import android.widget.TextView;
 import com.alium.orin.helper.MusicPlayerRemote;
 import com.alium.orin.helper.MusicProgressViewUpdateHelper;
 import com.alium.orin.helper.PlayPauseButtonOnClickHandler;
+import com.alium.orin.model.Song;
 import com.alium.orin.ui.fragments.AbsMusicServiceFragment;
+import com.alium.orin.util.LogUtil;
 import com.alium.orin.views.PlayPauseDrawable;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.kabouzeid.appthemehelper.util.ATHUtil;
@@ -40,6 +42,8 @@ public class MiniPlayerFragment extends AbsMusicServiceFragment implements Music
     ImageView miniPlayerPlayPauseButton;
     @BindView(R.id.progress_bar)
     MaterialProgressBar progressBar;
+    @BindView(R.id.mimi_player_pb)
+    ImageView loadingPB;
 
     private PlayPauseDrawable miniPlayerPlayPauseDrawable;
 
@@ -61,6 +65,7 @@ public class MiniPlayerFragment extends AbsMusicServiceFragment implements Music
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         unbinder = ButterKnife.bind(this, view);
+        loadingPB.setColorFilter(ATHUtil.resolveColor(getActivity(), R.attr.iconColor, ThemeStore.primaryColor(getActivity())), PorterDuff.Mode.SRC_IN);
 
         view.setOnTouchListener(new FlingPlayBackController(getActivity()));
         setUpMiniPlayer();
@@ -94,14 +99,58 @@ public class MiniPlayerFragment extends AbsMusicServiceFragment implements Music
         updatePlayPauseDrawableState(false);
     }
 
+    private boolean isShowLoading = false;
+
     @Override
     public void onPlayingMetaChanged() {
         updateSongTitle();
+        LogUtil.v("cardplayer", "onPlayingMetaChanged");
+        isShowLoading = !MusicPlayerRemote.getCurrentSong().isLocalSong();
+        if (miniPlayerPlayPauseButton.getVisibility() == View.INVISIBLE) {
+            miniPlayerPlayPauseButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
     public void onPlayStateChanged() {
         updatePlayPauseDrawableState(true);
+    }
+
+    @Override
+    public void onPlayError() {
+        super.onPlayError();
+        LogUtil.v("mini", "onPlayError");
+        isShowLoading = false;
+        loadingPB.setVisibility(View.INVISIBLE);
+        miniPlayerPlayPauseDrawable.setPlay(true);
+        if (miniPlayerPlayPauseButton.getVisibility() == View.INVISIBLE) {
+            miniPlayerPlayPauseButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onPlayerStartPreper() {
+        LogUtil.v("mini", "onPlayerStartPreper");
+        if (!MusicPlayerRemote.getCurrentSong().isLocalSong()) {
+            isShowLoading = true;
+            loadingPB.setVisibility(View.VISIBLE);
+            miniPlayerPlayPauseButton.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
+    public void onPlayerEndPrepered() {
+        super.onPlayerEndPrepered();
+        isShowLoading = false;
+        loadingPB.getHandler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                loadingPB.setVisibility(View.INVISIBLE);
+            }
+        }, 500);
+        if (miniPlayerPlayPauseButton.getVisibility() == View.INVISIBLE) {
+            miniPlayerPlayPauseButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -151,9 +200,18 @@ public class MiniPlayerFragment extends AbsMusicServiceFragment implements Music
     }
 
     protected void updatePlayPauseDrawableState(boolean animate) {
+        Song song = MusicPlayerRemote.getCurrentSong();
         if (MusicPlayerRemote.isPlaying()) {
+            if (!song.isLocalSong() && isShowLoading) {
+                loadingPB.setVisibility(View.VISIBLE);
+            } else {
+                loadingPB.setVisibility(View.INVISIBLE);
+            }
             miniPlayerPlayPauseDrawable.setPause(animate);
         } else {
+            if (!song.isLocalSong()) {
+                loadingPB.setVisibility(View.INVISIBLE);
+            }
             miniPlayerPlayPauseDrawable.setPlay(animate);
         }
     }

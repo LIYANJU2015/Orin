@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import com.alium.orin.ui.fragments.mainactivity.library.pager.AlbumsFragment;
 import com.alium.orin.ui.fragments.mainactivity.library.pager.ArtistsFragment;
+import com.alium.orin.ui.fragments.mainactivity.library.pager.HomeFragment;
 import com.alium.orin.ui.fragments.mainactivity.library.pager.SongsFragment;
 import com.alium.orin.R;
 import com.alium.orin.ui.fragments.mainactivity.library.pager.PlaylistsFragment;
@@ -36,6 +37,7 @@ public class MusicLibraryPagerAdapter extends FragmentPagerAdapter {
         super(fragmentManager);
         mContext = context;
         titles = new String[]{
+                context.getResources().getString(R.string.home),
                 context.getResources().getString(R.string.songs),
                 context.getResources().getString(R.string.albums),
                 context.getResources().getString(R.string.artists),
@@ -107,6 +109,7 @@ public class MusicLibraryPagerAdapter extends FragmentPagerAdapter {
     }
 
     public enum MusicFragments {
+        HOME(HomeFragment.class),
         SONG(SongsFragment.class),
         ALBUM(AlbumsFragment.class),
         ARTIST(ArtistsFragment.class),

@@ -27,6 +27,7 @@ import android.support.annotation.Nullable;
 
 import com.alium.orin.model.Song;
 import com.alium.orin.loader.SongLoader;
+import com.alium.orin.soundcloud.HomeSound;
 
 import java.util.ArrayList;
 
@@ -42,6 +43,11 @@ public class MusicPlaybackQueueStore extends SQLiteOpenHelper {
     public static final String PLAYING_QUEUE_TABLE_NAME = "playing_queue";
     public static final String ORIGINAL_PLAYING_QUEUE_TABLE_NAME = "original_playing_queue";
     private static final int VERSION = 3;
+
+    public static final String IS_LOCAL = "is_local";
+    public static final String ALBUM_IMAGE = "album_image";
+    public static final String SONG_PLAY_TIME = "song_play_time";
+    public static final String SONG_DOWNLOAD_URL = "song_download_url";
 
     /**
      * Constructor of <code>MusicPlaybackState</code>
@@ -94,6 +100,18 @@ public class MusicPlaybackQueueStore extends SQLiteOpenHelper {
 
         builder.append(AudioColumns.ARTIST_ID);
         builder.append(" INT NOT NULL,");
+
+        builder.append(IS_LOCAL);
+        builder.append(" INT,");
+
+        builder.append(ALBUM_IMAGE);
+        builder.append(" STRING,");
+
+        builder.append(SONG_PLAY_TIME);
+        builder.append(" STRING,");
+
+        builder.append(SONG_DOWNLOAD_URL);
+        builder.append(" STRING,");
 
         builder.append(AudioColumns.ARTIST);
         builder.append(" STRING NOT NULL);");
@@ -164,13 +182,22 @@ public class MusicPlaybackQueueStore extends SQLiteOpenHelper {
                     values.put(AudioColumns.TITLE, song.title);
                     values.put(AudioColumns.TRACK, song.trackNumber);
                     values.put(AudioColumns.YEAR, song.year);
-                    values.put(AudioColumns.DURATION, song.duration);
-                    values.put(AudioColumns.DATA, song.data);
+                    values.put(AudioColumns.DURATION, song.getDuration());
+                    values.put(AudioColumns.DATA, song.getPath());
                     values.put(AudioColumns.DATE_MODIFIED, song.dateModified);
                     values.put(AudioColumns.ALBUM_ID, song.albumId);
                     values.put(AudioColumns.ALBUM, song.albumName);
                     values.put(AudioColumns.ARTIST_ID, song.artistId);
                     values.put(AudioColumns.ARTIST, song.artistName);
+
+                    if (song instanceof HomeSound.ContentsBeanX.ContentsBean) {
+                        values.put(IS_LOCAL, 0);
+                        values.put(ALBUM_IMAGE, song.getAlbum_images());
+                        values.put(SONG_PLAY_TIME, ((HomeSound.ContentsBeanX.ContentsBean) song).song_play_time);
+                        values.put(SONG_DOWNLOAD_URL, song.getStreamUrl());
+                    } else {
+                        values.put(IS_LOCAL, 1);
+                    }
 
                     database.insert(tableName, null, values);
                 }

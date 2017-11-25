@@ -30,6 +30,7 @@ import com.alium.orin.dialogs.SongShareDialog;
 import com.alium.orin.helper.MusicPlayerRemote;
 import com.alium.orin.model.Song;
 import com.alium.orin.ui.activities.base.AbsSlidingMusicPanelActivity;
+import com.alium.orin.util.LogUtil;
 import com.alium.orin.util.MusicUtil;
 import com.alium.orin.views.WidthFitSquareLayout;
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
@@ -304,6 +305,9 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
     private void updateLyrics() {
         if (updateLyricsAsyncTask != null) updateLyricsAsyncTask.cancel(false);
         final Song song = MusicPlayerRemote.getCurrentSong();
+        if (!song.isLocalSong()) {
+            return;
+        }
         updateLyricsAsyncTask = new AsyncTask<Void, Void, String>() {
             @Override
             protected void onPreExecute() {
@@ -315,8 +319,9 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
             @Override
             protected String doInBackground(Void... params) {
                 try {
-                    return AudioFileIO.read(new File(song.data)).getTagOrCreateDefault().getFirst(FieldKey.LYRICS);
+                    return AudioFileIO.read(new File(song.getPath())).getTagOrCreateDefault().getFirst(FieldKey.LYRICS);
                 } catch (Exception e) {
+                    LogUtil.e(TAG, " AudioFileIO.read " + song.getPath());
                     e.printStackTrace();
                     cancel(false);
                     return null;

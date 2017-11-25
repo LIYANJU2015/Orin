@@ -9,21 +9,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.alium.orin.helper.MusicPlayerRemote;
-import com.alium.orin.util.MusicUtil;
-import com.kabouzeid.appthemehelper.util.ColorUtil;
-import com.kabouzeid.appthemehelper.util.MaterialValueHelper;
-import com.kabouzeid.appthemehelper.util.TintHelper;
 import com.alium.orin.R;
+import com.alium.orin.helper.MusicPlayerRemote;
 import com.alium.orin.helper.MusicProgressViewUpdateHelper;
 import com.alium.orin.helper.PlayPauseButtonOnClickHandler;
 import com.alium.orin.misc.SimpleOnSeekbarChangeListener;
+import com.alium.orin.model.Song;
 import com.alium.orin.service.MusicService;
 import com.alium.orin.ui.fragments.AbsMusicServiceFragment;
+import com.alium.orin.util.LogUtil;
+import com.alium.orin.util.MusicUtil;
 import com.alium.orin.views.PlayPauseDrawable;
+import com.kabouzeid.appthemehelper.ThemeStore;
+import com.kabouzeid.appthemehelper.util.ColorUtil;
+import com.kabouzeid.appthemehelper.util.MaterialValueHelper;
+import com.kabouzeid.appthemehelper.util.TintHelper;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -53,6 +57,8 @@ public class CardPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
     TextView songTotalTime;
     @BindView(R.id.player_song_current_progress)
     TextView songCurrentProgress;
+    @BindView(R.id.player_progressbar)
+    ImageView playerPB;
 
     private PlayPauseDrawable playerFabPlayPauseDrawable;
 
@@ -60,6 +66,8 @@ public class CardPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
     private int lastDisabledPlaybackControlsColor;
 
     private MusicProgressViewUpdateHelper progressViewUpdateHelper;
+
+    private boolean isShowLoading = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,6 +85,9 @@ public class CardPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         unbinder = ButterKnife.bind(this, view);
+
+        playerPB.setColorFilter(ThemeStore.primaryColor(getActivity()));
+
         setUpMusicControllers();
         updateProgressTextColor();
     }
@@ -104,6 +115,55 @@ public class CardPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
         updatePlayPauseDrawableState(false);
         updateRepeatState();
         updateShuffleState();
+    }
+
+    @Override
+    public void onPlayError() {
+        super.onPlayError();
+        LogUtil.v("cardplayer", "onPlayError");
+        isShowLoading = false;
+        playerPB.setVisibility(View.INVISIBLE);
+        playerFabPlayPauseDrawable.setPlay(true);
+        if (playPauseFab.getVisibility() == View.INVISIBLE) {
+            playPauseFab.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onPlayingMetaChanged() {
+        super.onPlayingMetaChanged();
+        LogUtil.v("cardplayer", "onPlayingMetaChanged");
+        isShowLoading = !MusicPlayerRemote.getCurrentSong().isLocalSong();
+        if (playPauseFab.getVisibility() == View.INVISIBLE) {
+            playPauseFab.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onPlayerEndPrepered() {
+        super.onPlayerEndPrepered();
+        LogUtil.v("cardplayer", "onPlayerEndPrepered");
+        isShowLoading = false;
+        playerPB.getHandler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                playerPB.setVisibility(View.INVISIBLE);
+            }
+        }, 500);
+
+        if (playPauseFab.getVisibility() == View.INVISIBLE) {
+            playPauseFab.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onPlayerStartPreper() {
+        LogUtil.v("cardplayer", "onPlayerStartPreper");
+        if (!MusicPlayerRemote.getCurrentSong().isLocalSong()) {
+            isShowLoading = true;
+            playerPB.setVisibility(View.VISIBLE);
+            playPauseFab.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -157,9 +217,18 @@ public class CardPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
     }
 
     protected void updatePlayPauseDrawableState(boolean animate) {
+        Song song = MusicPlayerRemote.getCurrentSong();
         if (MusicPlayerRemote.isPlaying()) {
+            if (!song.isLocalSong() && isShowLoading) {
+                playerPB.setVisibility(View.VISIBLE);
+            } else {
+                playerPB.setVisibility(View.INVISIBLE);
+            }
             playerFabPlayPauseDrawable.setPause(animate);
         } else {
+            if (!song.isLocalSong()) {
+                playerPB.setVisibility(View.INVISIBLE);
+            }
             playerFabPlayPauseDrawable.setPlay(animate);
         }
     }

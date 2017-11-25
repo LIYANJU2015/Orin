@@ -111,9 +111,17 @@ public class SongGlideRequest {
 
     public static DrawableTypeRequest createBaseRequest(RequestManager requestManager, Song song, boolean ignoreMediaStore) {
         if (ignoreMediaStore) {
-            return requestManager.load(new AudioFileCover(song.data));
+            if (song.isLocalSong()) {
+                return requestManager.load(new AudioFileCover(song.getPath()));
+            } else {
+                return requestManager.load(song.getAlbum_images());
+            }
         } else {
-            return requestManager.loadFromMediaStore(MusicUtil.getMediaStoreAlbumCoverUri(song.albumId));
+            if (song.isLocalSong()) {
+                return requestManager.loadFromMediaStore(MusicUtil.getMediaStoreAlbumCoverUri(song.albumId));
+            } else {
+                return requestManager.load(song.getAlbum_images());
+            }
         }
     }
 

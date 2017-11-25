@@ -123,12 +123,28 @@
             android:layout_height="56dp"
             android:layout_centerInParent="true" />
 
+        <FrameLayout
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/player_play_pause_fab"
+            android:layout_gravity="center"
             style="@style/Fab"
-            android:layout_centerInParent="true"
             app:elevation="4dp"
             app:pressedTranslationZ="2dp" />
+
+            <com.alium.orin.views.LoadingProgressBar
+                android:visibility="invisible"
+                android:layout_gravity="center"
+                android:clickable="false"
+                android:src="@drawable/music_btn_loading"
+                android:id="@+id/player_progressbar"
+                android:layout_width="55dp"
+                android:layout_height="55dp" />
+
+        </FrameLayout>
 
     </RelativeLayout>
 

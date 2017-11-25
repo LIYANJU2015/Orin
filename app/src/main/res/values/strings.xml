@@ -304,4 +304,7 @@
         I always wanted to implement  Aleksandar Tešić\'s designs of a music player that can be found here!
         https://material.uplabs.com/posts/a-music-player-in-material-design-a-concept, but haven\'t had the time to start one from scratch,
         so well I used Phonograph as a base , I don\'t have permissions to use these designs yet so I can\'t release the app on the Playstore</string>
+
+
+    <string name="home">Home</string>
 </resources>

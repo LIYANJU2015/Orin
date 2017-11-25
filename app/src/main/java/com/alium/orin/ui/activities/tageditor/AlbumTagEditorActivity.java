@@ -184,7 +184,7 @@ public class AlbumTagEditorActivity extends AbsTagEditorActivity implements Text
         ArrayList<Song> songs = AlbumLoader.getAlbum(this, getId()).songs;
         ArrayList<String> paths = new ArrayList<>(songs.size());
         for (Song song : songs) {
-            paths.add(song.data);
+            paths.add(song.getPath());
         }
         return paths;
     }

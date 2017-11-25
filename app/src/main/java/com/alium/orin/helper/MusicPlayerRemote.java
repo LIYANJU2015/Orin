@@ -16,6 +16,7 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.alium.orin.model.Song;
@@ -27,6 +28,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.WeakHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Karim Abou Zeid (kabouzeid)
@@ -111,68 +115,107 @@ public class MusicPlayerRemote {
      * Async
      */
     public static void playSongAt(final int position) {
-        if (musicService != null) {
-            musicService.playSongAt(position);
-        }
+        sCacheExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (musicService != null) {
+                    musicService.playSongAt(position);
+                }
+            }
+        });
     }
 
     /**
      * Async
      */
     public static void setPosition(final int position) {
-        if (musicService != null) {
-            musicService.setPosition(position);
-        }
+        sCacheExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (musicService != null) {
+                    musicService.setPosition(position);
+                }
+            }
+        });
     }
 
     public static void pauseSong() {
-        if (musicService != null) {
-            musicService.pause();
-        }
+        sCacheExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (musicService != null) {
+                    musicService.pause();
+                }
+            }
+        });
     }
 
     /**
      * Async
      */
     public static void playNextSong() {
-        if (musicService != null) {
-            musicService.playNextSong(true);
-        }
+        sCacheExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (musicService != null) {
+                    musicService.playNextSong(true);
+                }
+            }
+        });
     }
 
     /**
      * Async
      */
     public static void playPreviousSong() {
-        if (musicService != null) {
-            musicService.playPreviousSong(true);
-        }
+        sCacheExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (musicService != null) {
+                    musicService.playPreviousSong(true);
+                }
+            }
+        });
     }
 
     /**
      * Async
      */
     public static void back() {
-        if (musicService != null) {
-            musicService.back(true);
-        }
+        sCacheExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (musicService != null) {
+                    musicService.back(true);
+                }
+            }
+        });
     }
 
     public static boolean isPlaying() {
         return musicService != null && musicService.isPlaying();
     }
 
+    private static Executor sCacheExecutor = Executors.newSingleThreadExecutor();
+
     public static void resumePlaying() {
-        if (musicService != null) {
-            musicService.play();
-        }
+        sCacheExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (musicService != null) {
+                    musicService.play();
+                }
+            }
+        });
     }
 
     /**
      * Async
      */
     public static void openQueue(final ArrayList<Song> queue, final int startPosition, final boolean startPlaying) {
+        Log.v("xx", "openQueue>>>>>>");
         if (!tryToHandleOpenPlayingQueue(queue, startPosition, startPlaying) && musicService != null) {
+            Log.v("xx", "openQueue into >>>>>>");
             musicService.openQueue(queue, startPosition, startPlaying);
         }
     }

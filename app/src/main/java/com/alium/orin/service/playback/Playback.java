@@ -37,9 +37,13 @@ public interface Playback {
 
     int getAudioSessionId();
 
+    void stopPrepareBlock();
+
     interface PlaybackCallbacks {
         void onTrackWentToNext();
 
         void onTrackEnded();
+
+        void onError();
     }
 }
