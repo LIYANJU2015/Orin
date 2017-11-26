@@ -6,25 +6,23 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.ThemedSpinnerAdapter;
 
 import com.alium.orin.App;
 import com.alium.orin.R;
 import com.alium.orin.helper.MusicPlayerRemote;
 import com.alium.orin.model.Song;
 import com.alium.orin.soundcloud.HomeSound;
-import com.alium.orin.soundcloud.SoundCloundClient;
+import com.alium.orin.soundcloud.SoundCloudClient;
+import com.alium.orin.ui.activities.HomeSoundListActivity;
 import com.alium.orin.ui.fragments.AbsMusicServiceFragment;
 import com.alium.orin.util.ACache;
 import com.alium.orin.util.LogUtil;
 import com.bumptech.glide.Glide;
-import com.google.gson.Gson;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.zhy.adapter.recyclerview.MultiItemTypeAdapter;
 import com.zhy.adapter.recyclerview.base.ItemViewDelegate;
@@ -46,7 +44,7 @@ import retrofit2.Response;
  * Created by liyanju on 2017/11/24.
  */
 
-public class HomeFragment extends AbsMusicServiceFragment{
+public class HomeFragment extends AbsMusicServiceFragment {
 
     private Unbinder unbinder;
 
@@ -60,9 +58,20 @@ public class HomeFragment extends AbsMusicServiceFragment{
     @BindView(R.id.app_bar_under_color)
     View behaviourOverLapEmulator;
 
-    private static ArrayList<HomeSoundInAdapter> mDatas = new ArrayList<>();
+    public static ArrayList<HomeSoundInAdapter> mDatas = new ArrayList<>();
 
     private MultiItemTypeAdapter itemTypeAdapter;
+
+    public static ArrayList<Song> getHomeSoundContents(String title) {
+        for (HomeSoundInAdapter soundInAdapter : mDatas) {
+            if (soundInAdapter.contentsBean2 != null && title.equals(soundInAdapter.contentsBean2.getName())) {
+                return soundInAdapter.contentsBean2.getContents();
+            } else if (soundInAdapter.contentsBeanX != null && title.equals(soundInAdapter.contentsBeanX.getName())) {
+                return soundInAdapter.contentsBeanX.contents;
+            }
+        }
+        return new ArrayList<>();
+    }
 
     @Nullable
     @Override
@@ -95,13 +104,13 @@ public class HomeFragment extends AbsMusicServiceFragment{
         new AsyncTask<Void, Void, HomeSound>() {
             @Override
             protected HomeSound doInBackground(Void... voids) {
-                String body = ACache.get(mContext).getAsString(SoundCloundClient.HOME_SOUND_URL);
-                if (!TextUtils.isEmpty(body)) {
-                    try {
-                        return GsonUtils.fromJson(body, HomeSound.class);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                try {
+                    Object obj = ACache.get(mContext).getAsObject(SoundCloudClient.HOME_SOUND_URL);
+                    if (obj != null) {
+                        return (HomeSound) obj;
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
                 return null;
             }
@@ -121,19 +130,19 @@ public class HomeFragment extends AbsMusicServiceFragment{
     }
 
     private void requestHomeSound() {
-        SoundCloundClient.getHomeSoundRetrofit(mContext).getHomeSound(SoundCloundClient.getClientId())
+        SoundCloudClient.getHomeSoundRetrofit(mContext).getHomeSound(SoundCloudClient.getClientId())
                 .enqueue(new Callback<HomeSound>() {
                     @Override
                     public void onResponse(Call<HomeSound> call, final Response<HomeSound> response) {
-                        HomeSound homeSound = response.body();
+                        final HomeSound homeSound = response.body();
                         LogUtil.v("home", " requestHomeSoundData onResponse " + homeSound);
                         showHomeSoundView(homeSound);
                         App.sHomeSound = null;
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                ACache.get(mContext).put(SoundCloundClient.HOME_SOUND_URL,
-                                        response.message(), 60*60*24*5);
+                                ACache.get(mContext).put(SoundCloudClient.HOME_SOUND_URL,
+                                        homeSound, 60 * 60 * 24 * 5);
                             }
                         }).start();
                     }
@@ -141,6 +150,7 @@ public class HomeFragment extends AbsMusicServiceFragment{
                     @Override
                     public void onFailure(Call<HomeSound> call, Throwable throwable) {
                         throwable.printStackTrace();
+                        LogUtil.e("home", " onFailure " + App.sHomeSound);
                         if (App.sHomeSound != null) {
                             showHomeSoundView(App.sHomeSound);
                         } else {
@@ -189,7 +199,7 @@ public class HomeFragment extends AbsMusicServiceFragment{
         }
 
         @Override
-        public void convert(ViewHolder holder, HomeSoundInAdapter homeSoundInAdapter, int position) {
+        public void convert(ViewHolder holder, final HomeSoundInAdapter homeSoundInAdapter, int position) {
             holder.setText(R.id.single_title_tv, homeSoundInAdapter.contentsBean2.getName());
 
             Glide.with(mContext).load(homeSoundInAdapter.contentsBean2.getContents().get(0).getAlbum_images()).crossFade()
@@ -198,7 +208,7 @@ public class HomeFragment extends AbsMusicServiceFragment{
             holder.setOnClickListener(R.id.home_single_relative, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    HomeSoundListActivity.launch(mContext, homeSoundInAdapter.contentsBean2.getName());
                 }
             });
         }
@@ -258,7 +268,7 @@ public class HomeFragment extends AbsMusicServiceFragment{
         }
     }
 
-    static class TitleItemDelagate implements ItemViewDelegate<HomeSoundInAdapter> {
+    class TitleItemDelagate implements ItemViewDelegate<HomeSoundInAdapter> {
 
         @Override
         public int getItemViewLayoutId() {
@@ -271,12 +281,12 @@ public class HomeFragment extends AbsMusicServiceFragment{
         }
 
         @Override
-        public void convert(ViewHolder holder, HomeSoundInAdapter homeSoundInAdapter, int position) {
+        public void convert(ViewHolder holder, final HomeSoundInAdapter homeSoundInAdapter, int position) {
             holder.setText(R.id.home_item_title, homeSoundInAdapter.contentsBeanX.getName());
             holder.setOnClickListener(R.id.title_relative, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    HomeSoundListActivity.launch(mContext, homeSoundInAdapter.contentsBeanX.getName());
                 }
             });
             if (homeSoundInAdapter.contentsBeanX.getData_type() == 0) {

@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.alium.orin.model.Song;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * Created by liyanju on 2017/11/18.
  */
 
-public class HomeSound {
+public class HomeSound implements Serializable{
 
     private int id;
     private String name;
@@ -70,7 +71,7 @@ public class HomeSound {
     }
 
 
-    public static class ContentsBean2 {
+    public static class ContentsBean2 implements Serializable{
         private int id;
         private String name;
         private String style;
@@ -117,18 +118,18 @@ public class HomeSound {
             this.type = type;
         }
 
-        private List<ContentsBeanX.ContentsBean> contents;
+        private ArrayList<Song> contents;
 
-        public List<ContentsBeanX.ContentsBean> getContents() {
+        public ArrayList<Song> getContents() {
             return contents;
         }
 
-        public void setContents(List<ContentsBeanX.ContentsBean> contents) {
+        public void setContents(ArrayList<Song> contents) {
             this.contents = contents;
         }
     }
 
-    public static class ContentsBeanX {
+    public static class ContentsBeanX implements Serializable {
 
 
         private int id;
@@ -136,9 +137,9 @@ public class HomeSound {
         private String style;
         private int data_type;
         private int type;
-        public List<ContentsBean> contents = new ArrayList<>();
+        public ArrayList<Song> contents = new ArrayList<>();
 
-        public List<ContentsBean2> contents2 = new ArrayList<>();
+        public ArrayList<ContentsBean2> contents2 = new ArrayList<>();
 
 
         public int getId() {
@@ -184,6 +185,9 @@ public class HomeSound {
 
         public static class ContentsBean extends Song {
 
+            public ContentsBean() {
+            }
+
             public ContentsBean(int id, String title, int trackNumber, int year, long duration, String data, long dateModified, int albumId, String albumName, int artistId, String artistName) {
                 super(id, title, trackNumber, year, duration, data, dateModified, albumId, albumName, artistId, artistName);
             }
@@ -222,7 +226,9 @@ public class HomeSound {
             @Override
             public long getDuration() {
                 try {
-                    return Long.parseLong(song_play_time);
+                    if (!TextUtils.isEmpty(song_play_time)) {
+                        return Long.parseLong(song_play_time);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

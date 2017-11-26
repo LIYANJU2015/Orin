@@ -14,30 +14,30 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.afollestad.materialcab.MaterialCab;
+import com.alium.orin.R;
 import com.alium.orin.adapter.song.CustomPlaylistSongAdapter;
 import com.alium.orin.adapter.song.PlaylistSongAdapter;
+import com.alium.orin.adapter.song.SongAdapter;
+import com.alium.orin.dialogs.SleepTimerDialog;
 import com.alium.orin.helper.MusicPlayerRemote;
 import com.alium.orin.interfaces.CabHolder;
+import com.alium.orin.interfaces.LoaderIds;
 import com.alium.orin.loader.PlaylistSongLoader;
+import com.alium.orin.misc.WrappedAsyncTaskLoader;
+import com.alium.orin.model.AbsCustomPlaylist;
 import com.alium.orin.model.Playlist;
+import com.alium.orin.model.PlaylistSong;
 import com.alium.orin.model.Song;
 import com.alium.orin.ui.activities.base.AbsSlidingMusicPanelActivity;
 import com.alium.orin.util.NavigationUtil;
 import com.alium.orin.util.PhonographColorUtil;
+import com.alium.orin.util.PlaylistsUtil;
+import com.alium.orin.util.ViewUtil;
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
 import com.kabouzeid.appthemehelper.ThemeStore;
-import com.alium.orin.R;
-import com.alium.orin.adapter.song.SongAdapter;
-import com.alium.orin.dialogs.SleepTimerDialog;
-import com.alium.orin.interfaces.LoaderIds;
-import com.alium.orin.misc.WrappedAsyncTaskLoader;
-import com.alium.orin.model.AbsCustomPlaylist;
-import com.alium.orin.model.PlaylistSong;
-import com.alium.orin.util.PlaylistsUtil;
-import com.alium.orin.util.ViewUtil;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.ArrayList;
@@ -46,6 +46,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+/**
+ * 最近添加， 历史记录，等页面
+ */
 public class PlaylistDetailActivity extends AbsSlidingMusicPanelActivity implements CabHolder, LoaderManager.LoaderCallbacks<ArrayList<Song>> {
 
     public static final String TAG = PlaylistDetailActivity.class.getSimpleName();

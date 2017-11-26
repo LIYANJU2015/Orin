@@ -1,6 +1,7 @@
 package com.alium.orin.ui.activities;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
@@ -19,6 +20,9 @@ import android.widget.TextView;
 
 import com.alium.orin.loader.AlbumLoader;
 import com.alium.orin.loader.ArtistLoader;
+import com.alium.orin.soundcloud.SoundCloudClient;
+import com.alium.orin.soundcloud.Track;
+import com.alium.orin.util.LogUtil;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.alium.orin.R;
 import com.alium.orin.adapter.SearchAdapter;
@@ -34,6 +38,9 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SearchActivity extends AbsMusicServiceActivity implements SearchView.OnQueryTextListener, LoaderManager.LoaderCallbacks<List<Object>> {
     public static final String TAG = SearchActivity.class.getSimpleName();
@@ -52,10 +59,13 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
     private SearchAdapter adapter;
     private String query;
 
+    private Context mContext;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+        mContext = getApplicationContext();
         setDrawUnderStatusbar(true);
         ButterKnife.bind(this);
 
@@ -152,6 +162,7 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
     }
 
     private void search(@NonNull String query) {
+        cancelQuerySoundCloud();
         this.query = query;
         getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
@@ -159,6 +170,7 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
     @Override
     public void onMediaStoreChanged() {
         super.onMediaStoreChanged();
+        cancelQuerySoundCloud();
         getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
@@ -182,8 +194,65 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mQueryAsyncTask != null) {
+            mQueryAsyncTask.cancel(true);
+        }
+    }
+
+    private AsyncTask mQueryAsyncTask;
+
+    private void cancelQuerySoundCloud() {
+        if (mQueryAsyncTask != null) {
+            mQueryAsyncTask.cancel(true);
+        }
+    }
+
+    public void querySoundCloud(final String query, final List<Object> results) {
+        cancelQuerySoundCloud();
+
+        mQueryAsyncTask = new AsyncTask<Void, Void,List<Track>>(){
+            @Override
+            protected List<Track> doInBackground(Void... voids) {
+                try {
+                    Response<List<Track>> response = SoundCloudClient.getSoundCloudRetrofit(mContext).getTracks(query, 50).execute();
+                    return response.body();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(List<Track> tracks) {
+                super.onPostExecute(tracks);
+                if (isCancelled()){
+                    return;
+                }
+                if (tracks != null && !tracks.isEmpty() && results != null) {
+                    for (int i = 0; i < results.size(); i++) {
+                        Object object = results.get(i);
+                        if (object instanceof String
+                                && ((String)object).equals(mContext.getResources()
+                                .getString(R.string.sound_cloud))) {
+                            results.add(i+1, mContext.getResources().getString(R.string.sound_cloud));
+                            results.addAll(i + 2, tracks);
+                            adapter.notifyDataSetChanged();
+                            return;
+                        }
+                    }
+                    results.add(mContext.getResources().getString(R.string.sound_cloud));
+                    results.addAll(tracks);
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }.execute();
+    }
+
+    @Override
     public Loader<List<Object>> onCreateLoader(int id, Bundle args) {
-        return new AsyncSearchResultLoader(this, query);
+        return new AsyncSearchResultLoader(this,this, query);
     }
 
     @Override
@@ -198,15 +267,17 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
 
     private static class AsyncSearchResultLoader extends WrappedAsyncTaskLoader<List<Object>> {
         private final String query;
+        private SearchActivity searchActivity;
 
-        public AsyncSearchResultLoader(Context context, String query) {
+        public AsyncSearchResultLoader(SearchActivity searchActivity, Context context, String query) {
             super(context);
             this.query = query;
+            this.searchActivity = searchActivity;
         }
 
         @Override
         public List<Object> loadInBackground() {
-            List<Object> results = new ArrayList<>();
+            final List<Object> results = new ArrayList<>();
             if (!TextUtils.isEmpty(query)) {
                 List songs = SongLoader.getSongs(getContext(), query);
                 if (!songs.isEmpty()) {
@@ -225,6 +296,12 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
                     results.add(getContext().getResources().getString(R.string.albums));
                     results.addAll(albums);
                 }
+                searchActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        searchActivity.querySoundCloud(query, results);
+                    }
+                });
             }
             return results;
         }

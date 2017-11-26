@@ -5,10 +5,12 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * @author Karim Abou Zeid (kabouzeid)
  */
-public class Song implements Parcelable {
+public class Song implements Parcelable, Serializable {
     public static final Song EMPTY_SONG = new Song(-1, "", -1, -1, -1, "", -1, -1, "", -1, "");
 
     public int id;

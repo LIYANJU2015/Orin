@@ -11,14 +11,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -26,13 +23,15 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by liyanju on 2017/11/24.
  */
 
-public class SoundCloundClient {
+public class SoundCloudClient {
 
     public static final String CLIENT_ID = "LegNTza81OuwVaDfYELQW1X71tY1sot8";
 
     public static final String HOME_SOUND_URL = "http://navigation.api.hk.goforandroid.com/api/v1/website/navigations/";
+    public static final String SOUND_CLOUD_API_URL = "https://api.soundcloud.com";
 
     private static Retrofit sHomeSoundRF;
+    private static Retrofit sSoundCloudRF;
 
     private static Cache createDefaultCache(Context context) {
         File cacheDir = new File(context.getCacheDir().getAbsolutePath(), "/okhttp/");
@@ -61,7 +60,28 @@ public class SoundCloundClient {
         return "";
     }
 
-    public static SoundCloundService getHomeSoundRetrofit(Context context) {
+    public static SoundCloudService getSoundCloudRetrofit(Context context) {
+        if (sSoundCloudRF == null) {
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            Gson gson = gsonBuilder.create();
+            GsonConverterFactory gsonConverterFactory = GsonConverterFactory.create(gson);
+
+
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .cache(createDefaultCache(context))
+                    .connectTimeout(15 * 1000, TimeUnit.MILLISECONDS)
+                    .readTimeout(20 * 1000, TimeUnit.MILLISECONDS)
+                    .build();
+            sSoundCloudRF = new Retrofit.Builder()
+                    .baseUrl(SOUND_CLOUD_API_URL)
+                    .client(client)
+                    .addConverterFactory(gsonConverterFactory)
+                    .build();
+        }
+        return sSoundCloudRF.create(SoundCloudService.class);
+    }
+
+    public static SoundCloudService getHomeSoundRetrofit(Context context) {
         if (sHomeSoundRF == null) {
             GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.registerTypeAdapter(HomeSound.ContentsBeanX.class, new HomeSoundDeserializer());
@@ -81,7 +101,7 @@ public class SoundCloundClient {
                     .addConverterFactory(gsonConverterFactory)
                     .build();
         }
-        return sHomeSoundRF.create(SoundCloundService.class);
+        return sHomeSoundRF.create(SoundCloudService.class);
     }
 
 }

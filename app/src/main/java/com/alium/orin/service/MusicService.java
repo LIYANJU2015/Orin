@@ -53,7 +53,7 @@ import com.alium.orin.service.notification.PlayingNotification;
 import com.alium.orin.service.notification.PlayingNotificationImpl;
 import com.alium.orin.service.notification.PlayingNotificationImpl24;
 import com.alium.orin.service.playback.Playback;
-import com.alium.orin.soundcloud.SoundCloundClient;
+import com.alium.orin.soundcloud.SoundCloudClient;
 import com.alium.orin.util.LogUtil;
 import com.alium.orin.util.MusicUtil;
 import com.alium.orin.util.PreferenceUtil;
@@ -181,7 +181,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
         if (song.isLocalSong()) {
             url = MusicUtil.getSongFileUri(song.id).toString();
         } else {
-            url = song.getStreamUrl() + "?client_id=" + SoundCloundClient.CLIENT_ID;
+            url = song.getStreamUrl() + "?client_id=" + SoundCloudClient.CLIENT_ID;
         }
         LogUtil.v(TAG, " >>getTrackUri url " + url);
         return url;

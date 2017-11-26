@@ -1,5 +1,6 @@
 package com.alium.orin.soundcloud;
 
+import com.alium.orin.model.Song;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -26,7 +27,7 @@ public class ContentsBean2Deserializer implements JsonDeserializer<HomeSound.Con
         contentsBean2.setStyle(jsonObject.get("style").getAsString());
         contentsBean2.setData_type(jsonObject.get("data_type").getAsInt());
 
-        ArrayList<HomeSound.ContentsBeanX.ContentsBean> list = new ArrayList<>();
+        ArrayList<Song> list = new ArrayList<>();
         JsonArray contents = jsonObject.getAsJsonArray("contents");
         for (int i = 0 ; i < contents.size(); i++) {
             JsonObject jsonObject1 = contents.get(i).getAsJsonObject();

@@ -97,6 +97,7 @@
         <activity android:name="com.alium.orin.ui.activities.AlbumDetailActivity" />
         <activity android:name="com.alium.orin.ui.activities.ArtistDetailActivity" />
         <activity android:name="com.alium.orin.ui.activities.PlaylistDetailActivity" />
+        <activity android:name=".ui.activities.HomeSoundListActivity"/>
         <activity
             android:name="com.alium.orin.ui.activities.tageditor.SongTagEditorActivity"
             android:windowSoftInputMode="adjustResize" />

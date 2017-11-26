@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.TimeUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,8 @@ import com.alium.orin.glide.artistimage.ArtistImage;
 import com.alium.orin.helper.MusicPlayerRemote;
 import com.alium.orin.model.Album;
 import com.alium.orin.model.Song;
+import com.alium.orin.soundcloud.HomeSound;
+import com.alium.orin.soundcloud.Track;
 import com.alium.orin.util.ArtistSignatureUtil;
 import com.alium.orin.util.MusicUtil;
 import com.alium.orin.util.NavigationUtil;
@@ -39,6 +42,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
     private static final int ALBUM = 1;
     private static final int ARTIST = 2;
     private static final int SONG = 3;
+    private static final int SOUND_CLOUND = 4;
 
     private final AppCompatActivity activity;
     private List<Object> dataSet;
@@ -58,6 +62,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         if (dataSet.get(position) instanceof Album) return ALBUM;
         if (dataSet.get(position) instanceof Artist) return ARTIST;
         if (dataSet.get(position) instanceof Song) return SONG;
+        if (dataSet.get(position) instanceof Track) return SOUND_CLOUND;
         return HEADER;
     }
 
@@ -79,6 +84,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                 holder.text.setText(album.getArtistName());
                 SongGlideRequest.Builder.from(Glide.with(activity), album.safeGetFirstSong())
                         .checkIgnoreMediaStore(activity).build()
+                        .placeholder(R.drawable.default_album_art)
                         .into(holder.image);
                 break;
             case ARTIST:
@@ -100,10 +106,37 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                 holder.title.setText(song.title);
                 holder.text.setText(song.albumName);
                 break;
+            case SOUND_CLOUND:
+                final Track track = (Track) dataSet.get(position);
+                holder.title.setText(track.getTitle());
+                Pair<String,String> temp = getTime(track.getDuration());
+                holder.text.setText(temp.first + ":" + temp.second);
+                holder.image.setVisibility(View.VISIBLE);
+                Glide.with(activity)
+                        .load(track.getArtworkURL())
+                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                        .placeholder(R.drawable.default_artist_image)
+                        .animate(android.R.anim.fade_in)
+                        .into(holder.image);
+                break;
             default:
                 holder.title.setText(dataSet.get(position).toString());
                 break;
         }
+    }
+
+    public Pair<String, String> getTime(int millsec) {
+        int min, sec;
+        sec = millsec / 1000;
+        min = sec / 60;
+        sec = sec % 60;
+        String minS, secS;
+        minS = String.valueOf(min);
+        secS = String.valueOf(sec);
+        if (sec < 10) {
+            secS = "0" + secS;
+        }
+        return Pair.create(minS, secS);
     }
 
     @Override
@@ -147,6 +180,8 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                 case ARTIST:
                     setImageTransitionName(activity.getString(R.string.transition_artist_image));
                     break;
+                case SOUND_CLOUND:
+                    break;
                 default:
                     View container = itemView.findViewById(R.id.image_container);
                     if (container != null) {
@@ -177,6 +212,17 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                 case SONG:
                     ArrayList<Song> playList = new ArrayList<>();
                     playList.add((Song) item);
+                    MusicPlayerRemote.openQueue(playList, 0, true);
+                    break;
+                case SOUND_CLOUND:
+                    Track track = (Track)item;
+                    HomeSound.ContentsBeanX.ContentsBean contentsBean = new HomeSound.ContentsBeanX.ContentsBean();
+                    contentsBean.song_download_url = track.getStreamURL();
+                    contentsBean.album_images = track.getArtworkURL();
+                    contentsBean.title = track.getTitle();
+                    contentsBean.song_play_time = String.valueOf(track.getDuration());
+                    playList = new ArrayList<>();
+                    playList.add(contentsBean);
                     MusicPlayerRemote.openQueue(playList, 0, true);
                     break;
             }
