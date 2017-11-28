@@ -28,10 +28,14 @@ import android.widget.TextView;
 
 import com.alium.orin.dialogs.SongShareDialog;
 import com.alium.orin.helper.MusicPlayerRemote;
+import com.alium.orin.lyrics.DownloadThread;
+import com.alium.orin.lyrics.LyricUtil;
+import com.alium.orin.lyrics.all.Lyrics;
 import com.alium.orin.model.Song;
 import com.alium.orin.ui.activities.base.AbsSlidingMusicPanelActivity;
 import com.alium.orin.util.LogUtil;
 import com.alium.orin.util.MusicUtil;
+import com.alium.orin.views.LyricView;
 import com.alium.orin.views.WidthFitSquareLayout;
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
@@ -78,6 +82,8 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
     View colorBackground;
     @BindView(R.id.player_queue_sub_header)
     TextView playerQueueSubHeader;
+    @BindView(R.id.lyrics_view)
+    LyricView lyricView;
 
     private int lastColor;
 
@@ -302,60 +308,83 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
         }.execute(MusicPlayerRemote.getCurrentSong());
     }
 
+    private Lyrics mCurrentLyrics;
+    private DownloadThread downloadThread;
+
     private void updateLyrics() {
-        if (updateLyricsAsyncTask != null) updateLyricsAsyncTask.cancel(false);
-        final Song song = MusicPlayerRemote.getCurrentSong();
-        if (!song.isLocalSong()) {
-            return;
+        if (downloadThread != null) {
+            downloadThread.cancel(true);
         }
-        updateLyricsAsyncTask = new AsyncTask<Void, Void, String>() {
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                lyricsInfo = null;
-                toolbar.getMenu().removeItem(R.id.action_show_lyrics);
-            }
+        final Song song = MusicPlayerRemote.getCurrentSong();
 
-            @Override
-            protected String doInBackground(Void... params) {
-                try {
-                    return AudioFileIO.read(new File(song.getPath())).getTagOrCreateDefault().getFirst(FieldKey.LYRICS);
-                } catch (Exception e) {
-                    LogUtil.e(TAG, " AudioFileIO.read " + song.getPath());
-                    e.printStackTrace();
-                    cancel(false);
-                    return null;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(String lyrics) {
-                super.onPostExecute(lyrics);
-                if (TextUtils.isEmpty(lyrics)) {
-                    lyricsInfo = null;
-                    if (toolbar != null) {
-                        toolbar.getMenu().removeItem(R.id.action_show_lyrics);
+        if (mCurrentLyrics != null && mCurrentLyrics.getTrack().equals(song.title)
+                && mCurrentLyrics.getArtist().equals(song.artistName)) {
+            lyricView.setLyricFile(mCurrentLyrics.getLyricsFile(), "UTF-8");
+        } else {
+            lyricView.reset("");
+            downloadThread = new DownloadThread(new Lyrics.Callback() {
+                @Override
+                public void onLyricsDownloaded(Lyrics lyrics) {
+                    lyricView.setVisibility(View.VISIBLE);
+                    if (lyrics.getFlag() == Lyrics.POSITIVE_RESULT) {
+                        mCurrentLyrics = lyrics;
+                        lyricView.setLyricFile(mCurrentLyrics.getLyricsFile(), "UTF-8");
+                    } else {
+                        lyricView.reset(mContext.getResources().getString(R.string.no_lyrics));
                     }
-                } else {
-                    lyricsInfo = new LyricsDialog.LyricInfo(song.title, lyrics);
-                    Activity activity = getActivity();
-                    if (toolbar != null && activity != null)
-                        if (toolbar.getMenu().findItem(R.id.action_show_lyrics) == null) {
-                            int color = ToolbarContentTintHelper.toolbarContentColor(activity, Color.TRANSPARENT);
-                            Drawable drawable = Util.getTintedVectorDrawable(activity, R.drawable.ic_comment_text_outline_white_24dp, color);
-                            toolbar.getMenu()
-                                    .add(Menu.NONE, R.id.action_show_lyrics, Menu.NONE, R.string.action_show_lyrics)
-                                    .setIcon(drawable)
-                                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                        }
                 }
-            }
-
-            @Override
-            protected void onCancelled(String s) {
-                onPostExecute(null);
-            }
-        }.execute();
+            }, false, song.artistName, song.title);
+            downloadThread.execute();
+        }
+//        updateLyricsAsyncTask = new AsyncTask<Void, Void, String>() {
+//            @Override
+//            protected void onPreExecute() {
+//                super.onPreExecute();
+//                lyricsInfo = null;
+//                toolbar.getMenu().removeItem(R.id.action_show_lyrics);
+//            }
+//
+//            @Override
+//            protected String doInBackground(Void... params) {
+//                try {
+//                    //return AudioFileIO.read(new File(song.getPath())).getTagOrCreateDefault().getFirst(FieldKey.LYRICS);
+//                    DownloadThread
+//                } catch (Exception e) {
+//                    LogUtil.e(TAG, " AudioFileIO.read " + song.getPath());
+//                    e.printStackTrace();
+//                    cancel(false);
+//                    return null;
+//                }
+//            }
+//
+//            @Override
+//            protected void onPostExecute(String lyrics) {
+//                super.onPostExecute(lyrics);
+//                if (TextUtils.isEmpty(lyrics)) {
+//                    lyricsInfo = null;
+//                    if (toolbar != null) {
+//                        toolbar.getMenu().removeItem(R.id.action_show_lyrics);
+//                    }
+//                } else {
+//                    lyricsInfo = new LyricsDialog.LyricInfo(song.title, lyrics);
+//                    Activity activity = getActivity();
+//                    if (toolbar != null && activity != null)
+//                        if (toolbar.getMenu().findItem(R.id.action_show_lyrics) == null) {
+//                            int color = ToolbarContentTintHelper.toolbarContentColor(activity, Color.TRANSPARENT);
+//                            Drawable drawable = Util.getTintedVectorDrawable(activity, R.drawable.ic_comment_text_outline_white_24dp, color);
+//                            toolbar.getMenu()
+//                                    .add(Menu.NONE, R.id.action_show_lyrics, Menu.NONE, R.string.action_show_lyrics)
+//                                    .setIcon(drawable)
+//                                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+//                        }
+//                }
+//            }
+//
+//            @Override
+//            protected void onCancelled(String s) {
+//                onPostExecute(null);
+//            }
+//        }.execute();
     }
 
     @Override

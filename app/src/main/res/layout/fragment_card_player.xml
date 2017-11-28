@@ -47,6 +47,12 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
+                    <com.alium.orin.views.LyricView
+                        android:id="@+id/lyrics_view"
+                        android:visibility="invisible"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
                 </com.alium.orin.views.WidthFitSquareLayout>
 
                 <fragment

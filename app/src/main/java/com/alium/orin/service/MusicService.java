@@ -556,6 +556,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
     }
 
     private void prepareNext() {
+        playback.stopPrepareBlock();
         playerHandler.removeMessages(PREPARE_NEXT);
         playerHandler.obtainMessage(PREPARE_NEXT).sendToTarget();
     }
@@ -866,6 +867,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
 
     public void setPosition(final int position) {
         // handle this on the handlers thread to avoid blocking the ui thread
+        playback.stopPrepareBlock();
         playerHandler.removeMessages(SET_POSITION);
         playerHandler.obtainMessage(SET_POSITION, position, 0).sendToTarget();
     }

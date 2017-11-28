@@ -24,6 +24,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 /**
+ * 全屏音乐播放器顶部区域
  * @author Karim Abou Zeid (kabouzeid)
  */
 public class PlayerAlbumCoverFragment extends AbsMusicServiceFragment implements ViewPager.OnPageChangeListener {
