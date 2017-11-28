@@ -347,11 +347,21 @@ public class CardPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
         });
     }
 
+    private MusicProgressViewUpdateHelper.Callback mListener;
+
+    public void setProgressChangeListener(MusicProgressViewUpdateHelper.Callback listener) {
+        mListener = listener;
+    }
+
     @Override
     public void onUpdateProgressViews(int progress, int total) {
         progressSlider.setMax(total);
         progressSlider.setProgress(progress);
         songTotalTime.setText(MusicUtil.getReadableDurationString(total));
         songCurrentProgress.setText(MusicUtil.getReadableDurationString(progress));
+
+        if (mListener != null) {
+            mListener.onUpdateProgressViews(progress, total);
+        }
     }
 }

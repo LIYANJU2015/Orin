@@ -28,6 +28,7 @@ import android.widget.TextView;
 
 import com.alium.orin.dialogs.SongShareDialog;
 import com.alium.orin.helper.MusicPlayerRemote;
+import com.alium.orin.helper.MusicProgressViewUpdateHelper;
 import com.alium.orin.lyrics.DownloadThread;
 import com.alium.orin.lyrics.LyricUtil;
 import com.alium.orin.lyrics.all.Lyrics;
@@ -141,6 +142,14 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
 
         // for some reason the xml attribute doesn't get applied here.
         playingQueueCard.setCardBackgroundColor(ATHUtil.resolveColor(getActivity(), R.attr.cardBackgroundColor));
+
+        playbackControlsFragment.setProgressChangeListener(new MusicProgressViewUpdateHelper.Callback() {
+            @Override
+            public void onUpdateProgressViews(int progress, int total) {
+                lyricView.setCurrentTimeMillis(progress);
+            }
+        });
+
     }
 
     @Override
