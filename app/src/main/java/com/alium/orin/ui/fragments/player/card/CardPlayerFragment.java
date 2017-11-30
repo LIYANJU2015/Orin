@@ -334,8 +334,11 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
             downloadThread = new DownloadThread(new Lyrics.Callback() {
                 @Override
                 public void onLyricsDownloaded(Lyrics lyrics) {
+                    if (lyricView == null) {
+                        return;
+                    }
                     lyricView.setVisibility(View.VISIBLE);
-                    if (lyrics.getFlag() == Lyrics.POSITIVE_RESULT) {
+                    if (lyrics != null && lyrics.getFlag() == Lyrics.POSITIVE_RESULT) {
                         mCurrentLyrics = lyrics;
                         lyricView.setLyricFile(mCurrentLyrics.getLyricsFile(), "UTF-8");
                     } else {

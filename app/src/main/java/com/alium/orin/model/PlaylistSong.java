@@ -3,15 +3,29 @@ package com.alium.orin.model;
 import android.os.Parcel;
 
 public class PlaylistSong extends Song {
-    public static final PlaylistSong EMPTY_PLAYLIST_SONG = new PlaylistSong(-1, "", -1, -1, -1, "", -1, -1, "", -1, "", -1, -1);
+    public static final PlaylistSong EMPTY_PLAYLIST_SONG = new PlaylistSong("",true, -1, "", -1, -1, -1, "", -1, -1, "", -1, "", -1, -1);
 
-    public final int playlistId;
-    public final int idInPlayList;
+    public final int playlistId; //歌单ID
+    public final int idInPlayList;//_ID 歌单里 歌曲的唯一值
+    public boolean isLocal = true;
+    public String albumImage;
 
-    public PlaylistSong(int id, String title, int trackNumber, int year, long duration, String data, int dateModified, int albumId, String albumName, int artistId, String artistName, final int playlistId, final int idInPlayList) {
+    public PlaylistSong(String albumImage, boolean isLocal, int id, String title, int trackNumber, int year, long duration, String data, int dateModified, int albumId, String albumName, int artistId, String artistName, final int playlistId, final int idInPlayList) {
         super(id, title, trackNumber, year, duration, data, dateModified, albumId, albumName, artistId, artistName);
         this.playlistId = playlistId;
         this.idInPlayList = idInPlayList;
+        this.isLocal = isLocal;
+        this.albumImage = albumImage;
+    }
+
+    @Override
+    public boolean isLocalSong() {
+        return isLocal;
+    }
+
+    @Override
+    public String getAlbum_images() {
+        return albumImage;
     }
 
     @Override

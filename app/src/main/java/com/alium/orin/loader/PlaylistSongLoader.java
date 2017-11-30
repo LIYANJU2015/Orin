@@ -2,11 +2,10 @@ package com.alium.orin.loader;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.provider.MediaStore;
-import android.provider.MediaStore.Audio.AudioColumns;
 import android.support.annotation.NonNull;
 
 import com.alium.orin.model.PlaylistSong;
+import com.alium.orin.provider.PlayListProvider;
 
 import java.util.ArrayList;
 
@@ -30,41 +29,30 @@ public class PlaylistSongLoader {
 
     @NonNull
     private static PlaylistSong getPlaylistSongFromCursorImpl(@NonNull Cursor cursor, int playlistId) {
-        final int id = cursor.getInt(0);
-        final String title = cursor.getString(1);
-        final int trackNumber = cursor.getInt(2);
-        final int year = cursor.getInt(3);
-        final long duration = cursor.getLong(4);
-        final String data = cursor.getString(5);
-        final int dateModified = cursor.getInt(6);
-        final int albumId = cursor.getInt(7);
-        final String albumName = cursor.getString(8);
-        final int artistId = cursor.getInt(9);
-        final String artistName = cursor.getString(10);
-        final int idInPlaylist = cursor.getInt(11);
+        final int id = cursor.getInt(cursor.getColumnIndex(PlayListProvider.PlayListSong.ID));
+        final String title = cursor.getString(cursor.getColumnIndex(PlayListProvider.PlayListSong.TITLE));
+        final int trackNumber = cursor.getInt(cursor.getColumnIndex(PlayListProvider.PlayListSong.TRACK));
+        final int year = cursor.getInt(cursor.getColumnIndex(PlayListProvider.PlayListSong.YEAR));
+        final long duration = cursor.getLong(cursor.getColumnIndex(PlayListProvider.PlayListSong.DURATION));
+        final String data = cursor.getString(cursor.getColumnIndex(PlayListProvider.PlayListSong.DATA));
+        final int dateModified = cursor.getInt(cursor.getColumnIndex(PlayListProvider.PlayListSong.DATE_MODIFIED));
+        final int albumId = cursor.getInt(cursor.getColumnIndex(PlayListProvider.PlayListSong.ALBUM_ID));
+        final String albumName = cursor.getString(cursor.getColumnIndex(PlayListProvider.PlayListSong.ALBUM));
+        final int artistId = cursor.getInt(cursor.getColumnIndex(PlayListProvider.PlayListSong.ARTIST_ID));
+        final String artistName = cursor.getString(cursor.getColumnIndex(PlayListProvider.PlayListSong.ARTIST));
+        final int idInPlaylist = cursor.getInt(cursor.getColumnIndex(PlayListProvider.PlayListSong._ID));
+        final boolean isLocal = cursor.getInt(cursor.getColumnIndex(PlayListProvider.PlayListSong.IS_LOCAL)) == 1;
+        String albuImage = cursor.getString(cursor.getColumnIndex(PlayListProvider.PlayListSong.ALBUM_IMAGE));
 
-        return new PlaylistSong(id, title, trackNumber, year, duration, data, dateModified, albumId, albumName, artistId, artistName, playlistId, idInPlaylist);
+        return new PlaylistSong(albuImage, isLocal, id, title, trackNumber, year, duration, data, dateModified, albumId, albumName, artistId, artistName, playlistId, idInPlaylist);
     }
 
     public static Cursor makePlaylistSongCursor(@NonNull final Context context, final int playlistId) {
         try {
             return context.getContentResolver().query(
-                    MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
-                    new String[]{
-                            MediaStore.Audio.Playlists.Members.AUDIO_ID,// 0
-                            AudioColumns.TITLE,// 1
-                            AudioColumns.TRACK,// 2
-                            AudioColumns.YEAR,// 3
-                            AudioColumns.DURATION,// 4
-                            AudioColumns.DATA,// 5
-                            AudioColumns.DATE_MODIFIED,// 6
-                            AudioColumns.ALBUM_ID,// 7
-                            AudioColumns.ALBUM,// 8
-                            AudioColumns.ARTIST_ID,// 9
-                            AudioColumns.ARTIST,// 10
-                            MediaStore.Audio.Playlists.Members._ID // 11
-                    }, SongLoader.BASE_SELECTION, null,
-                    MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
+                    PlayListProvider.PlayListSong.URI,null,
+                    PlayListProvider.PlayListSong.TITLE + " != ''", null,
+                    PlayListProvider.PlayListSong.PLAY_ORDER);
         } catch (SecurityException e) {
             return null;
         }

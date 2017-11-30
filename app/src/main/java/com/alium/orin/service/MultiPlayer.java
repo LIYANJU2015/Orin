@@ -130,6 +130,7 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
         if (path == null) {
             return;
         }
+        LogUtil.v(TAG, "gaplessPlayback: " + PreferenceUtil.getInstance(context).gaplessPlayback());
         if (PreferenceUtil.getInstance(context).gaplessPlayback()) {
             mNextMediaPlayer = new MediaPlayer();
             mNextMediaPlayer.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);

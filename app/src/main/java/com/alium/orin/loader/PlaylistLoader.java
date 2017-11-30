@@ -3,12 +3,11 @@ package com.alium.orin.loader;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.BaseColumns;
-import android.provider.MediaStore;
-import android.provider.MediaStore.Audio.PlaylistsColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.alium.orin.model.Playlist;
+import com.alium.orin.provider.PlayListProvider;
 
 import java.util.ArrayList;
 
@@ -34,7 +33,7 @@ public class PlaylistLoader {
     public static Playlist getPlaylist(@NonNull final Context context, final String playlistName) {
         return getPlaylist(makePlaylistCursor(
                 context,
-                PlaylistsColumns.NAME + "=?",
+                PlayListProvider.PlayList.NAME + "=?",
                 new String[]{
                         playlistName
                 }
@@ -77,13 +76,13 @@ public class PlaylistLoader {
     @Nullable
     public static Cursor makePlaylistCursor(@NonNull final Context context, final String selection, final String[] values) {
         try {
-            return context.getContentResolver().query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
+            return context.getContentResolver().query(PlayListProvider.PlayList.URI,
                     new String[]{
                         /* 0 */
-                            BaseColumns._ID,
+                            PlayListProvider.PlayList._ID,
                         /* 1 */
-                            PlaylistsColumns.NAME
-                    }, selection, values, MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
+                            PlayListProvider.PlayList.NAME
+                    }, selection, values, PlayListProvider.PlayList._ID);
         } catch (SecurityException e) {
             return null;
         }

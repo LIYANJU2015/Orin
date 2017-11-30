@@ -28,10 +28,16 @@ import com.alium.orin.model.Album;
 import com.kabouzeid.appthemehelper.util.TintHelper;
 import com.alium.orin.R;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * @author Karim Abou Zeid (kabouzeid)
  */
 public class Util {
+
+    public static ExecutorService sExecutorService = Executors.newSingleThreadExecutor();
 
     public static int getActionBarSize(@NonNull Context context) {
         TypedValue typedValue = new TypedValue();

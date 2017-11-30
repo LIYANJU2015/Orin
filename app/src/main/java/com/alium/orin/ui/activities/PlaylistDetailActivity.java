@@ -1,6 +1,7 @@
 package com.alium.orin.ui.activities;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
@@ -29,9 +30,11 @@ import com.alium.orin.model.Playlist;
 import com.alium.orin.model.PlaylistSong;
 import com.alium.orin.model.Song;
 import com.alium.orin.ui.activities.base.AbsSlidingMusicPanelActivity;
+import com.alium.orin.util.LogUtil;
 import com.alium.orin.util.NavigationUtil;
 import com.alium.orin.util.PhonographColorUtil;
 import com.alium.orin.util.PlaylistsUtil;
+import com.alium.orin.util.Util;
 import com.alium.orin.util.ViewUtil;
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
@@ -108,12 +111,17 @@ public class PlaylistDetailActivity extends AbsSlidingMusicPanelActivity impleme
             final GeneralItemAnimator animator = new RefactoredDefaultItemAnimator();
             adapter = new PlaylistSongAdapter(this, new ArrayList<PlaylistSong>(), R.layout.item_list, false, this, new PlaylistSongAdapter.OnMoveItemListener() {
                 @Override
-                public void onMoveItem(int fromPosition, int toPosition) {
-                    if (PlaylistsUtil.moveItem(PlaylistDetailActivity.this, playlist.id, fromPosition, toPosition)) {
-                        Song song = adapter.getDataSet().remove(fromPosition);
-                        adapter.getDataSet().add(toPosition, song);
-                        adapter.notifyItemMoved(fromPosition, toPosition);
-                    }
+                public void onMoveItem(final int fromPosition, final int toPosition) {
+                    LogUtil.v(TAG, "onMoveItem>>>>>>>");
+                    Song song = adapter.getDataSet().remove(fromPosition);
+                    adapter.getDataSet().add(toPosition, song);
+                    adapter.notifyItemMoved(fromPosition, toPosition);
+                    new AsyncTask<Void, Void, Boolean>(){
+                        @Override
+                        protected Boolean doInBackground(Void... voids) {
+                            return PlaylistsUtil.moveItem(PlaylistDetailActivity.this, playlist.id, fromPosition, toPosition);
+                        }
+                    }.executeOnExecutor(Util.sExecutorService);
                 }
             });
             wrappedAdapter = recyclerViewDragDropManager.createWrappedAdapter(adapter);

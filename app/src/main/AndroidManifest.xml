@@ -193,6 +193,10 @@
                 android:resource="@xml/app_widget_small_info" />
         </receiver>
 
+        <provider
+            android:authorities="com.alium.orin.provider.PlayListProvider"
+            android:name=".provider.PlayListProvider"/>
+
     </application>
 
 </manifest>
