@@ -10,6 +10,12 @@
     android:transitionName="@string/transition_mini_player"
     tools:ignore="UnusedAttribute">
 
+    <ImageView
+        android:id="@+id/mimi_play_iv_bg"
+        android:scaleType="centerCrop"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/mini_player_height" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -56,6 +62,7 @@
             <com.alium.orin.views.LoadingProgressBar
                 android:id="@+id/mimi_player_pb"
                 android:layout_gravity="center"
+                android:visibility="invisible"
                 android:src="@drawable/progress_rotate"
                 android:layout_width="35dp"
                 android:layout_height="35dp" />

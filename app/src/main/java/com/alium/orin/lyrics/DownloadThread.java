@@ -19,11 +19,14 @@ import com.alium.orin.lyrics.all.MetalArchives;
 import com.alium.orin.lyrics.all.PLyrics;
 import com.alium.orin.lyrics.all.UrbanLyrics;
 import com.alium.orin.lyrics.all.ViewLyrics;
+import com.alium.orin.util.LogUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class DownloadThread extends AsyncTask<Void, Void, Lyrics> {
+
+    public static String TAG = "DownloadThread";
 
     private static final String[] mainProviders =
             {
@@ -74,6 +77,7 @@ public class DownloadThread extends AsyncTask<Void, Void, Lyrics> {
     public Lyrics download(String url, String artist, String title) {
         Lyrics lyrics = null;
         for (String provider : providers) {
+            LogUtil.v(TAG, "download provider :: " + provider);
             switch (provider) {
                 case "AZLyrics":
                     lyrics = AZLyrics.fromURL(url, artist, title);
@@ -122,12 +126,10 @@ public class DownloadThread extends AsyncTask<Void, Void, Lyrics> {
     public Lyrics download(String artist, String title) {
         Lyrics lyrics = new Lyrics(Lyrics.NO_RESULT);
         for (String provider : providers) {
+            LogUtil.v(TAG, "providers::: " + provider);
             switch (provider) {
                 case "AZLyrics":
                     lyrics = AZLyrics.fromMetaData(artist, title);
-                    break;
-                case "Bollywood":
-                    lyrics = Bollywood.fromMetaData(artist, title);
                     break;
                 case "Genius":
                     lyrics = Genius.fromMetaData(artist, title);
@@ -163,8 +165,10 @@ public class DownloadThread extends AsyncTask<Void, Void, Lyrics> {
             }
             if (lyrics.isLRC() && !positionAvailable)
                 continue;
-            if (lyrics != null && lyrics.getFlag() == Lyrics.POSITIVE_RESULT)
+            if (lyrics != null && lyrics.getFlag() == Lyrics.POSITIVE_RESULT) {
+                lyrics.saveLyrics();
                 return lyrics;
+            }
         }
         return lyrics;
     }
@@ -172,6 +176,9 @@ public class DownloadThread extends AsyncTask<Void, Void, Lyrics> {
     public Lyrics run(String params[]) {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
+        //test
+//        params[0] = "u2band";
+//        params[1] = "discotheque";
         Lyrics lyrics;
         String artist = null;
         String title = null;

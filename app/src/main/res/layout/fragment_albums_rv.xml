@@ -39,15 +39,6 @@
         android:layout_width="wrap_content"
         android:layout_height="fill_parent" />
 
-    <TextView
-        android:id="@android:id/empty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:fontFamily="sans-serif-light"
-        android:text="@string/empty"
-        android:textColor="?android:textColorSecondary"
-        android:textSize="@dimen/empty_text_size"
-        android:visibility="gone" />
+    <include layout="@layout/layout_empty_view_default" />
 
 </FrameLayout>

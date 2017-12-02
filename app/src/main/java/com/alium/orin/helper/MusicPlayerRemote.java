@@ -26,6 +26,7 @@ import com.alium.orin.service.MusicService;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
@@ -217,6 +218,27 @@ public class MusicPlayerRemote {
         if (!tryToHandleOpenPlayingQueue(queue, startPosition, startPlaying) && musicService != null) {
             Log.v("xx", "openQueue into >>>>>>");
             musicService.openQueue(queue, startPosition, startPlaying);
+        }
+    }
+
+    private static final int MAX_QUEUE = 120;
+
+    private List<Song> checkQueue(ArrayList<Song> queue, int startPosition) {
+        if (queue.size() <= MAX_QUEUE) {
+            return queue;
+        }
+
+        int max_half_queue = MAX_QUEUE / 2;
+
+        if (startPosition > max_half_queue && (startPosition + max_half_queue) > queue.size()) {
+            return queue.subList(startPosition - max_half_queue
+                    - (startPosition + max_half_queue - queue.size()), queue.size());
+        } else if (startPosition > max_half_queue && (startPosition + max_half_queue) <= queue.size()) {
+            return  queue.subList(startPosition - max_half_queue, startPosition + max_half_queue);
+        } else if (startPosition <= max_half_queue) {
+            return queue.subList(0,MAX_QUEUE);
+        } else {
+            return queue;
         }
     }
 

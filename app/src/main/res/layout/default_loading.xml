@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    android:orientation="horizontal"
+    android:id="@+id/progress_frame"
+    android:visibility="gone"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <me.zhanghai.android.materialprogressbar.MaterialProgressBar
+        android:layout_margin="12dp"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:layout_width="40dp"
+        android:layout_height="40dp" />
+
+</FrameLayout>

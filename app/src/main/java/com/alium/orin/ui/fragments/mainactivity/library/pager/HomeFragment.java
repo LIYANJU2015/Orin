@@ -1,16 +1,17 @@
 package com.alium.orin.ui.fragments.mainactivity.library.pager;
 
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.RelativeLayout;
 
 import com.alium.orin.App;
 import com.alium.orin.R;
@@ -27,8 +28,6 @@ import com.kabouzeid.appthemehelper.ThemeStore;
 import com.zhy.adapter.recyclerview.MultiItemTypeAdapter;
 import com.zhy.adapter.recyclerview.base.ItemViewDelegate;
 import com.zhy.adapter.recyclerview.base.ViewHolder;
-
-import org.eclipse.egit.github.core.client.GsonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,10 +52,12 @@ public class HomeFragment extends AbsMusicServiceFragment {
 
     @Nullable
     @BindView(android.R.id.empty)
-    TextView empty;
+    RelativeLayout empty;
 
     @BindView(R.id.app_bar_under_color)
     View behaviourOverLapEmulator;
+    @BindView(R.id.loading_mb)
+    View loading_mb;
 
     public static ArrayList<HomeSoundInAdapter> mDatas = new ArrayList<>();
 
@@ -87,9 +88,9 @@ public class HomeFragment extends AbsMusicServiceFragment {
         behaviourOverLapEmulator.setBackgroundColor(ThemeStore.primaryColor(getActivity()));
 
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
-        itemTypeAdapter = new MultiItemTypeAdapter(mContext, mDatas);
+        itemTypeAdapter = new MultiItemTypeAdapter(getActivity(), mDatas);
         itemTypeAdapter.addItemViewDelegate(new TitleItemDelagate());
         itemTypeAdapter.addItemViewDelegate(new ListItemDelagate());
         itemTypeAdapter.addItemViewDelegate(new SingleItemDelagate());
@@ -102,6 +103,7 @@ public class HomeFragment extends AbsMusicServiceFragment {
 
     private void showHomeSoundData() {
         new AsyncTask<Void, Void, HomeSound>() {
+
             @Override
             protected HomeSound doInBackground(Void... voids) {
                 try {
@@ -130,6 +132,9 @@ public class HomeFragment extends AbsMusicServiceFragment {
     }
 
     private void requestHomeSound() {
+        if (loading_mb != null) {
+            loading_mb.setVisibility(View.VISIBLE);
+        }
         SoundCloudClient.getHomeSoundRetrofit(mContext).getHomeSound(SoundCloudClient.getClientId())
                 .enqueue(new Callback<HomeSound>() {
                     @Override
@@ -162,8 +167,15 @@ public class HomeFragment extends AbsMusicServiceFragment {
 
 
     private void showHomeSoundView(HomeSound homeSound) {
+        if (activity.isFinishing()) {
+            return;
+        }
+
         empty.setVisibility(View.INVISIBLE);
         recyclerView.setVisibility(View.VISIBLE);
+        if (loading_mb != null) {
+            loading_mb.setVisibility(View.INVISIBLE);
+        }
 
         try {
             HomeSoundInAdapter.convertHomeSound(homeSound, mDatas);
@@ -211,6 +223,8 @@ public class HomeFragment extends AbsMusicServiceFragment {
                     HomeSoundListActivity.launch(mContext, homeSoundInAdapter.contentsBean2.getName());
                 }
             });
+            ((ImageView)holder.getView(R.id.genres_home_item_iv)).setColorFilter(Color.parseColor("#757575"),
+                    PorterDuff.Mode.SRC_IN);
         }
     }
 

@@ -2,6 +2,7 @@ package com.alium.orin.ui.fragments.player;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,6 +14,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.alium.orin.R;
+import com.alium.orin.glide.BlurTransformation;
+import com.alium.orin.glide.SongGlideRequest;
 import com.alium.orin.helper.MusicPlayerRemote;
 import com.alium.orin.helper.MusicProgressViewUpdateHelper;
 import com.alium.orin.helper.PlayPauseButtonOnClickHandler;
@@ -20,9 +24,10 @@ import com.alium.orin.model.Song;
 import com.alium.orin.ui.fragments.AbsMusicServiceFragment;
 import com.alium.orin.util.LogUtil;
 import com.alium.orin.views.PlayPauseDrawable;
+import com.bumptech.glide.BitmapRequestBuilder;
+import com.bumptech.glide.Glide;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.kabouzeid.appthemehelper.util.ATHUtil;
-import com.alium.orin.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -44,6 +49,8 @@ public class MiniPlayerFragment extends AbsMusicServiceFragment implements Music
     MaterialProgressBar progressBar;
     @BindView(R.id.mimi_player_pb)
     ImageView loadingPB;
+    @BindView(R.id.mimi_play_iv_bg)
+    ImageView mimiPlayerIVBg;
 
     private PlayPauseDrawable miniPlayerPlayPauseDrawable;
 
@@ -109,6 +116,14 @@ public class MiniPlayerFragment extends AbsMusicServiceFragment implements Music
         if (miniPlayerPlayPauseButton.getVisibility() == View.INVISIBLE) {
             miniPlayerPlayPauseButton.setVisibility(View.VISIBLE);
         }
+//        SongGlideRequest.Builder.from(Glide.with(this), MusicPlayerRemote.getCurrentSong())
+//                .checkIgnoreMediaStore(mContext).build().placeholder(R.drawable.while_bg)
+//                .into(mimiPlayerIVBg);
+        BitmapRequestBuilder<?, Bitmap> request = SongGlideRequest.Builder.from(Glide.with(mContext),
+                MusicPlayerRemote.getCurrentSong())
+                .checkIgnoreMediaStore(mContext)
+                .asBitmap().build();
+        request.transform(new BlurTransformation.Builder(mContext).build()).into(mimiPlayerIVBg);
     }
 
     @Override

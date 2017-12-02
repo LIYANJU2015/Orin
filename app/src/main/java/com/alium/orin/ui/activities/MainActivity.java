@@ -5,6 +5,9 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,28 +25,28 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.alium.orin.R;
 import com.alium.orin.dialogs.ChangelogDialog;
 import com.alium.orin.glide.SongGlideRequest;
 import com.alium.orin.helper.MusicPlayerRemote;
+import com.alium.orin.helper.SearchQueryHelper;
+import com.alium.orin.loader.AlbumLoader;
+import com.alium.orin.loader.ArtistSongLoader;
 import com.alium.orin.loader.PlaylistSongLoader;
 import com.alium.orin.model.Song;
+import com.alium.orin.service.MusicService;
 import com.alium.orin.ui.activities.base.AbsSlidingMusicPanelActivity;
+import com.alium.orin.ui.activities.intro.AppIntroActivity;
+import com.alium.orin.ui.fragments.mainactivity.folders.FoldersFragment;
+import com.alium.orin.ui.fragments.mainactivity.library.LibraryFragment;
 import com.alium.orin.util.PreferenceUtil;
+import com.alium.orin.util.Util;
 import com.bumptech.glide.Glide;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.kabouzeid.appthemehelper.util.ATHUtil;
 import com.kabouzeid.appthemehelper.util.NavigationViewUtil;
-import com.alium.orin.R;
-import com.alium.orin.dialogs.DonationsDialog;
-import com.alium.orin.helper.SearchQueryHelper;
-import com.alium.orin.loader.AlbumLoader;
-import com.alium.orin.loader.ArtistSongLoader;
-import com.alium.orin.service.MusicService;
-import com.alium.orin.ui.activities.intro.AppIntroActivity;
-import com.alium.orin.ui.fragments.mainactivity.folders.FoldersFragment;
-import com.alium.orin.ui.fragments.mainactivity.library.LibraryFragment;
-import com.alium.orin.util.Util;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
@@ -58,6 +61,7 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
 
     private static final int LIBRARY = 0;
     private static final int FOLDERS = 1;
+    private static final int EQUALIZER = 2;
 
     @BindView(R.id.navigation_view)
     NavigationView navigationView;
@@ -108,7 +112,9 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
     }
 
     private void setMusicChooser(int key) {
-        PreferenceUtil.getInstance(this).setLastMusicChooser(key);
+        if (key != EQUALIZER) {
+            PreferenceUtil.getInstance(this).setLastMusicChooser(key);
+        }
         switch (key) {
             case LIBRARY:
                 navigationView.setCheckedItem(R.id.nav_library);
@@ -117,6 +123,16 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
             case FOLDERS:
                 navigationView.setCheckedItem(R.id.nav_folders);
                 setCurrentFragment(FoldersFragment.newInstance(this));
+                break;
+            case EQUALIZER:
+                int sessionId = MusicPlayerRemote.getAudioSessionId();
+                if (sessionId != AudioEffect.ERROR_BAD_VALUE && sessionId != -1) {
+                    navigationView.setCheckedItem(R.id.equalizer_item);
+                    EqualizerActivity.launch(getApplicationContext());
+                } else {
+                    Toast.makeText(this, getResources().getString(R.string.no_audio_ID),
+                            Toast.LENGTH_LONG).show();
+                }
                 break;
         }
     }
@@ -156,6 +172,24 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
     }
 
     private void setUpNavigationView() {
+        if (navigationDrawerHeader == null) {
+            navigationDrawerHeader = navigationView.inflateHeaderView(R.layout.navigation_drawer_header);
+            //noinspection ConstantConditions
+            navigationDrawerHeader.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    drawerLayout.closeDrawers();
+                    if (getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+                        expandPanel();
+                    }
+                }
+            });
+            Drawable defaultHeader = getResources().getDrawable(R.drawable.icon_drawer_theme_bg);
+            defaultHeader.setColorFilter(ThemeStore.primaryColor(getApplicationContext()),
+                    PorterDuff.Mode.DARKEN);
+            ((ImageView)navigationDrawerHeader.findViewById(R.id.image)).setImageDrawable(defaultHeader);
+        }
+
         int accentColor = ThemeStore.accentColor(this);
         NavigationViewUtil.setItemIconColors(navigationView, ATHUtil.resolveColor(this, R.attr.iconColor, ThemeStore.textColorSecondary(this)), accentColor);
         NavigationViewUtil.setItemTextColors(navigationView, ThemeStore.textColorPrimary(this), accentColor);
@@ -165,6 +199,14 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 drawerLayout.closeDrawers();
                 switch (menuItem.getItemId()) {
+                    case R.id.equalizer_item:
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                setMusicChooser(EQUALIZER);
+                            }
+                        }, 200);
+                        break;
                     case R.id.nav_library:
                         new Handler().postDelayed(new Runnable() {
                             @Override
@@ -197,13 +239,8 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
                             }
                         }, 200);
                         break;
-                    case R.id.nav_about:
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                startActivity(new Intent(MainActivity.this, AboutActivity.class));
-                            }
-                        }, 200);
+                    case R.id.nav_exit:
+                        finish();
                         break;
                 }
                 return true;
@@ -216,31 +253,20 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
     }
 
     private void updateNavigationDrawerHeader() {
+        if (navigationDrawerHeader == null) {
+            return;
+        }
+        Drawable defaultHeader = getResources().getDrawable(R.drawable.icon_drawer_theme_bg);
+        defaultHeader.setColorFilter(ThemeStore.primaryColor(getApplicationContext()), PorterDuff.Mode.DARKEN);
         if (!MusicPlayerRemote.getPlayingQueue().isEmpty()) {
             Song song = MusicPlayerRemote.getCurrentSong();
-            if (navigationDrawerHeader == null) {
-                navigationDrawerHeader = navigationView.inflateHeaderView(R.layout.navigation_drawer_header);
-                //noinspection ConstantConditions
-                navigationDrawerHeader.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        drawerLayout.closeDrawers();
-                        if (getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-                            expandPanel();
-                        }
-                    }
-                });
-            }
             ((TextView) navigationDrawerHeader.findViewById(R.id.title)).setText(song.title);
             ((TextView) navigationDrawerHeader.findViewById(R.id.text)).setText(song.artistName);
             SongGlideRequest.Builder.from(Glide.with(this), song)
                     .checkIgnoreMediaStore(this).build()
                     .into(((ImageView) navigationDrawerHeader.findViewById(R.id.image)));
         } else {
-            if (navigationDrawerHeader != null) {
-                navigationView.removeHeaderView(navigationDrawerHeader);
-                navigationDrawerHeader = null;
-            }
+            ((ImageView)navigationDrawerHeader.findViewById(R.id.image)).setImageDrawable(defaultHeader);
         }
     }
 

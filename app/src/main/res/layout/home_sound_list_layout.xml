@@ -23,7 +23,16 @@
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 style="@style/Toolbar"
-                android:background="@android:color/transparent" />
+                android:background="@android:color/transparent" >
+
+                <ImageView
+                    android:layout_marginRight="16dp"
+                    android:layout_gravity="right"
+                    android:src="@drawable/icon_soundcloud"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp" />
+
+            </android.support.v7.widget.Toolbar>
 
             <ViewStub
                 android:id="@+id/cab_stub"
@@ -41,15 +50,6 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@android:id/empty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:fontFamily="sans-serif-light"
-        android:text="@string/playlist_empty_text"
-        android:textColor="?android:textColorSecondary"
-        android:textSize="@dimen/empty_text_size"
-        android:visibility="gone" />
+    <include layout="@layout/layout_empty_view_default" />
 
 </FrameLayout>

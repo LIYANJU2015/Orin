@@ -12,4 +12,8 @@
     <color name="colorAccent">#ff00ba90</color>
 
     <color name="colorDividerBlack">#1f000000</color>
+
+    <color name="colorSubTextWhite">#b3ffffff</color>
+    <color name="colorPrimaryTextWhite">#ffffffff</color>
+    <color name="colorAccentReal">@color/mi_icon_color_dark</color>
 </resources>

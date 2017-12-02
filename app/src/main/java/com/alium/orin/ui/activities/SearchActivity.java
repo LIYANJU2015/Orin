@@ -12,10 +12,13 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alium.orin.loader.AlbumLoader;
@@ -31,6 +34,9 @@ import com.alium.orin.loader.SongLoader;
 import com.alium.orin.misc.WrappedAsyncTaskLoader;
 import com.alium.orin.ui.activities.base.AbsMusicServiceActivity;
 import com.alium.orin.util.Util;
+import com.paginate.Paginate;
+import com.paginate.recycler.LoadingListItemCreator;
+import com.zhy.adapter.recyclerview.wrapper.LoadMoreWrapper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +58,7 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(android.R.id.empty)
-    TextView empty;
+    RelativeLayout empty;
 
     SearchView searchView;
 
@@ -60,6 +66,8 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
     private String query;
 
     private Context mContext;
+
+    private Paginate mPaginate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +91,6 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
             }
         });
         recyclerView.setAdapter(adapter);
-
         recyclerView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -91,6 +98,10 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
                 return false;
             }
         });
+        mPaginate = Paginate.with(recyclerView, callbacks)
+                .setLoadingTriggerThreshold(0)
+                .build();
+        mPaginate.setHasMoreDataToLoad(false);
 
         setUpToolBar();
 
@@ -100,6 +111,26 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
 
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     }
+
+    private boolean isLoading;
+    private boolean isLoaded = true;
+
+    Paginate.Callbacks callbacks = new Paginate.Callbacks() {
+        @Override
+        public void onLoadMore() {
+
+        }
+
+        @Override
+        public boolean isLoading() {
+            return isLoading;
+        }
+
+        @Override
+        public boolean hasLoadedAllItems() {
+            return isLoaded;
+        }
+    };
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -199,6 +230,7 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
         if (mQueryAsyncTask != null) {
             mQueryAsyncTask.cancel(true);
         }
+        mPaginate.unbind();
     }
 
     private AsyncTask mQueryAsyncTask;
@@ -213,6 +245,15 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
         cancelQuerySoundCloud();
 
         mQueryAsyncTask = new AsyncTask<Void, Void,List<Track>>(){
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                isLoading = true;
+                isLoaded = false;
+                mPaginate.setHasMoreDataToLoad(true);
+            }
+
             @Override
             protected List<Track> doInBackground(Void... voids) {
                 try {
@@ -230,6 +271,11 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
                 if (isCancelled()){
                     return;
                 }
+
+                isLoading = false;
+                isLoaded = true;
+                mPaginate.setHasMoreDataToLoad(false);
+
                 if (tracks != null && !tracks.isEmpty() && results != null) {
                     for (int i = 0; i < results.size(); i++) {
                         Object object = results.get(i);

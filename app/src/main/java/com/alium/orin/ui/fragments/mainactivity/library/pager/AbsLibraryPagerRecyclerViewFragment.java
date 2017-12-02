@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.kabouzeid.appthemehelper.ThemeStore;
@@ -39,7 +40,7 @@ public abstract class AbsLibraryPagerRecyclerViewFragment<A extends RecyclerView
     RecyclerView recyclerView;
     @Nullable
     @BindView(android.R.id.empty)
-    TextView empty;
+    RelativeLayout empty;
 
     private A adapter;
     private LM layoutManager;
@@ -116,7 +117,7 @@ public abstract class AbsLibraryPagerRecyclerViewFragment<A extends RecyclerView
 
     private void checkIsEmpty() {
         if (empty != null) {
-            empty.setText(getEmptyMessage());
+            ((TextView)empty.findViewById(R.id.text_empty_title)).setText(getEmptyMessage());
             empty.setVisibility(adapter == null || adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
         }
     }

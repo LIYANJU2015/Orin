@@ -47,9 +47,26 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
-                    <com.alium.orin.views.LyricView
-                        android:id="@+id/lyrics_view"
+                    <ScrollView
+                        android:layout_marginTop="68dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+                    <TextView
+                        android:padding="16dp"
+                        android:gravity="center"
+                        android:textColor="@color/mi_icon_color_dark"
                         android:visibility="invisible"
+                        android:id="@+id/lyrics_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    </ScrollView>
+
+                    <TextView
+                        android:visibility="invisible"
+                        android:gravity="center"
+                        android:id="@+id/loading_ly_tip"
+                        android:textSize="16sp"
+                        android:textColor="@color/mi_icon_color_dark"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />
 

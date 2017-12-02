@@ -7,8 +7,10 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
 
+import com.alium.orin.App;
 import com.alium.orin.R;
 import com.alium.orin.helper.SortOrder;
+import com.alium.orin.model.EqualizerModel;
 import com.alium.orin.ui.fragments.mainactivity.folders.FoldersFragment;
 import com.alium.orin.ui.fragments.player.NowPlayingScreen;
 
@@ -400,4 +402,29 @@ public final class PreferenceUtil {
         editor.putString(START_DIRECTORY, file.getPath());
         editor.apply();
     }
+
+    public boolean isShowLyric() {
+        return mPreferences.getBoolean("Lyric", false);
+    }
+
+    public void setShowLyric(boolean isShow) {
+        final SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean("Lyric", isShow);
+        editor.apply();
+    }
+
+    public void saveEqualizerModel(EqualizerModel model) {
+        ACache.get(App.sContext).put("EqualizerModel", model);
+    }
+
+    public EqualizerModel getEqualizerModel() {
+        Object obj = ACache.get(App.sContext).getAsObject("EqualizerModel");
+        if (obj == null) {
+            return new EqualizerModel();
+        } else {
+            return (EqualizerModel)obj;
+        }
+    }
+
+
 }

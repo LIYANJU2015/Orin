@@ -80,6 +80,8 @@ public class AlbumCoverPagerAdapter extends CustomFragmentStatePagerAdapter {
 
         @BindView(R.id.player_image)
         ImageView albumCover;
+        @BindView(R.id.soundcloud_iv)
+        ImageView soundCloudIV;
 
         private boolean isColorReady;
         private int color;
@@ -117,6 +119,12 @@ public class AlbumCoverPagerAdapter extends CustomFragmentStatePagerAdapter {
 //            forceSquareAlbumCover(PreferenceUtil.getInstance(getContext()).forceSquareAlbumCover());
             PreferenceUtil.getInstance(getActivity()).registerOnSharedPreferenceChangedListener(this);
             loadAlbumCover();
+
+            if (!song.isLocalSong()) {
+                soundCloudIV.setVisibility(View.VISIBLE);
+            } else {
+                soundCloudIV.setVisibility(View.INVISIBLE);
+            }
         }
 
         @Override

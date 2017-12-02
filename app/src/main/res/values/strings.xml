@@ -310,4 +310,12 @@
 
     <string name="sound_cloud">Sound Cloud</string>
     <string name="no_lyrics">No lyrics</string>
+
+    <string name="equalizer_text">Equalizer</string>
+    <string name="lyrics_text">Lyrics</string>
+
+    <string name="action_exit">Exit</string>
+
+    <string name="loading_lyrics">Loading the lyrics...</string>
+
 </resources>

@@ -39,6 +39,10 @@ public class Util {
 
     public static ExecutorService sExecutorService = Executors.newSingleThreadExecutor();
 
+    public static void runSingleThread(Runnable runnable) {
+        sExecutorService.execute(runnable);
+    }
+
     public static int getActionBarSize(@NonNull Context context) {
         TypedValue typedValue = new TypedValue();
         int[] textSizeAttr = new int[]{R.attr.actionBarSize};

@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="com.android.vending.BILLING" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:name="com.alium.orin.App"
@@ -196,6 +197,9 @@
         <provider
             android:authorities="com.alium.orin.provider.PlayListProvider"
             android:name=".provider.PlayListProvider"/>
+
+       <activity android:name=".ui.activities.EqualizerActivity"
+           android:launchMode="singleTask"/>
 
     </application>
 

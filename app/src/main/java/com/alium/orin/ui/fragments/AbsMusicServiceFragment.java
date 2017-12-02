@@ -13,7 +13,7 @@ import com.alium.orin.util.LogUtil;
  * @author Karim Abou Zeid (kabouzeid)
  */
 public class AbsMusicServiceFragment extends Fragment implements MusicServiceEventListener {
-    private AbsMusicServiceActivity activity;
+    protected AbsMusicServiceActivity activity;
 
     protected Context mContext;
 

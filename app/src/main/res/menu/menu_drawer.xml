@@ -12,7 +12,13 @@
         <item
             android:id="@+id/nav_folders"
             android:icon="@drawable/ic_folder_white_24dp"
+
             android:title="@string/folders" />
+
+        <item
+            android:id="@+id/equalizer_item"
+            android:icon="@drawable/ic_equalizer_black_24dp"
+            android:title="@string/equalizer_text" />
     </group>
 
     <group
@@ -24,9 +30,9 @@
             android:icon="@drawable/ic_settings_white_24dp"
             android:title="@string/action_settings" />
         <item
-            android:id="@+id/nav_about"
-            android:icon="@drawable/ic_help_white_24dp"
-            android:title="@string/action_about" />
+            android:id="@+id/nav_exit"
+            android:icon="@drawable/ic_exit_to_app_black_48dp"
+            android:title="@string/action_exit" />
     </group>
 
 </menu>

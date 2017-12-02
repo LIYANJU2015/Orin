@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.afollestad.materialcab.MaterialCab;
@@ -66,7 +67,7 @@ public class PlaylistDetailActivity extends AbsSlidingMusicPanelActivity impleme
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(android.R.id.empty)
-    TextView empty;
+    RelativeLayout empty;
 
     private Playlist playlist;
 

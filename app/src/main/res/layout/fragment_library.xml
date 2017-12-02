@@ -51,8 +51,16 @@
             <android.support.design.widget.TabLayout
                 android:id="@+id/tabs"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/tab_height"
-                app:tabContentStart="@dimen/tab_bar_padding"
+                android:layout_height="wrap_content"
+                android:background="?colorPrimary"
+                android:paddingBottom="4.0dip"
+                app:tabIndicatorColor="@color/colorAccentReal"
+                app:tabBackground="?selectableItemBackgroundBorderless"
+                app:tabMinWidth="@dimen/tablayout_indicator_size_min"
+                app:tabMaxWidth="@dimen/tablayout_indicator_size_max"
+                app:tabSelectedTextColor="@color/colorPrimaryTextWhite"
+                app:tabTextColor="@color/colorSubTextWhite"
+                app:tabGravity="center"
                 app:tabMode="scrollable" />
 
         </android.support.design.widget.AppBarLayout>

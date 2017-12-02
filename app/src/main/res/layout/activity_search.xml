@@ -20,15 +20,7 @@
             android:layout_height="match_parent"
             android:scrollbars="vertical" />
 
-        <TextView
-            android:id="@android:id/empty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/no_results"
-            android:textColor="?android:textColorSecondary"
-            android:textSize="@dimen/empty_text_size" />
+        <include layout="@layout/layout_empty_view_default" />
 
     </FrameLayout>
 
