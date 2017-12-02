@@ -30,7 +30,7 @@
             android:layout_centerInParent="true"
             android:text="@string/equalizer_text"
             android:textColor="#FFFFFF"
-            android:textSize="25sp" />
+            android:textSize="20sp" />
 
         <android.support.v7.widget.SwitchCompat
             android:id="@+id/equalizer_switch"
@@ -79,19 +79,20 @@
                 android:layout_marginLeft="20dp" />
 
             <Spinner
+                android:layout_toRightOf="@id/showcase_view_equalizer"
                 android:id="@+id/equalizer_preset_spinner"
-                android:layout_width="match_parent"
+                android:layout_width="130dp"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="5dp"
-                android:layout_toLeftOf="@+id/spinner_dropdown_icon"
                 android:background="#36353b"
                  />
 
             <ImageView
+                android:layout_alignParentRight="true"
+                android:layout_gravity="center"
                 android:id="@+id/spinner_dropdown_icon"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
                 android:src="@drawable/dropdown_icon"

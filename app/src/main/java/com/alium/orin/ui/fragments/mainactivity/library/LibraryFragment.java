@@ -204,9 +204,6 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
             case R.id.action_sleep_timer:
                 new SleepTimerDialog().show(getChildFragmentManager(), "SET_SLEEP_TIMER");
                 return true;
-            case R.id.action_equalizer:
-                NavigationUtil.openEqualizer(getActivity());
-                return true;
             case R.id.action_shuffle_all:
                 MusicPlayerRemote.openAndShuffleQueue(SongLoader.getAllSongs(getActivity()), true);
                 return true;

@@ -128,7 +128,7 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
                 int sessionId = MusicPlayerRemote.getAudioSessionId();
                 if (sessionId != AudioEffect.ERROR_BAD_VALUE && sessionId != -1) {
                     navigationView.setCheckedItem(R.id.equalizer_item);
-                    EqualizerActivity.launch(getApplicationContext());
+                    EqualizerActivity.launch(this);
                 } else {
                     Toast.makeText(this, getResources().getString(R.string.no_audio_ID),
                             Toast.LENGTH_LONG).show();

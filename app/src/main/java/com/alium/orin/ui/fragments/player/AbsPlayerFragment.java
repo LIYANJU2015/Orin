@@ -76,7 +76,7 @@ public abstract class AbsPlayerFragment extends AbsMusicServiceFragment implemen
             case R.id.action_toggle_equalizer:
                 int sessionId = MusicPlayerRemote.getAudioSessionId();
                 if (sessionId != AudioEffect.ERROR_BAD_VALUE && sessionId != -1) {
-                    EqualizerActivity.launch(mContext);
+                    EqualizerActivity.launch(activity);
                 } else {
                     Toast.makeText(mContext, getResources().getString(R.string.no_audio_ID),
                             Toast.LENGTH_LONG).show();

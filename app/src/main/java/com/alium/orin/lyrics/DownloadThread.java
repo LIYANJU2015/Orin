@@ -116,7 +116,6 @@ public class DownloadThread extends AsyncTask<Void, Void, Lyrics> {
             if (lyrics.isLRC() && !positionAvailable)
                 continue;
             if (lyrics != null && lyrics.getFlag() == Lyrics.POSITIVE_RESULT) {
-                lyrics.saveLyrics();
                 return lyrics;
             }
         }
@@ -166,7 +165,6 @@ public class DownloadThread extends AsyncTask<Void, Void, Lyrics> {
             if (lyrics.isLRC() && !positionAvailable)
                 continue;
             if (lyrics != null && lyrics.getFlag() == Lyrics.POSITIVE_RESULT) {
-                lyrics.saveLyrics();
                 return lyrics;
             }
         }

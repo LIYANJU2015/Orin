@@ -1,5 +1,6 @@
 package com.alium.orin.ui.activities;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -115,10 +116,16 @@ public class EqualizerActivity extends AbsMusicServiceActivity {
 
     private static EqualizerModel sEqualizerModel = null;
 
-    public static void launch(Context context) {
-        Intent intent = new Intent(context, EqualizerActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(0, R.anim.slide_bottom_out);
+    }
+
+    public static void launch(Activity activity) {
+        Intent intent = new Intent(activity, EqualizerActivity.class);
+        activity.startActivity(intent);
+        activity.overridePendingTransition(R.anim.slide_bottom_in, 0);
     }
 
     @Override
@@ -311,9 +318,9 @@ public class EqualizerActivity extends AbsMusicServiceActivity {
         });
         equalizerBlocker = (FrameLayout) findViewById(R.id.equalizerBlocker);
         if (!sEqualizerModel.isEqualizerEnabled()) {
-            equalizerBlocker.setVisibility(View.GONE);
-        } else {
             equalizerBlocker.setVisibility(View.VISIBLE);
+        } else {
+            equalizerBlocker.setVisibility(View.GONE);
         }
 
         backBtn = (ImageView) findViewById(R.id.equalizer_back_btn);
@@ -488,7 +495,7 @@ public class EqualizerActivity extends AbsMusicServiceActivity {
         ArrayAdapter<String> equalizerPresetSpinnerAdapter = new ArrayAdapter<>(this,
                 R.layout.spinner_item,
                 equalizerPresetNames);
-        equalizerPresetSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        equalizerPresetSpinnerAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item2);
         equalizerPresetNames.add("Custom");
 
         for (short i = 0; i < mEqualizer.getNumberOfPresets(); i++) {
