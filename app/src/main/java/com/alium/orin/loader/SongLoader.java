@@ -92,12 +92,11 @@ public class SongLoader {
         } else {
             String albumImage = cursor.getString(cursor.getColumnIndexOrThrow(MusicPlaybackQueueStore.ALBUM_IMAGE));
             String songPlayTime = cursor.getString(cursor.getColumnIndexOrThrow(MusicPlaybackQueueStore.SONG_PLAY_TIME));
-            String downloadUrl = cursor.getString(cursor.getColumnIndexOrThrow(MusicPlaybackQueueStore.SONG_DOWNLOAD_URL));
             HomeSound.ContentsBeanX.ContentsBean contentsBean = new HomeSound.ContentsBeanX.ContentsBean(id, title, trackNumber, year,
                     duration, data, dateModified, albumId, albumName, artistId, artistName);
             contentsBean.album_images = albumImage;
             contentsBean.song_play_time = songPlayTime;
-            contentsBean.song_download_url = downloadUrl;
+            contentsBean.song_download_url = data;
             return contentsBean;
         }
     }

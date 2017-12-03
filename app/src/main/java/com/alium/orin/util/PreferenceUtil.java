@@ -426,5 +426,15 @@ public final class PreferenceUtil {
         }
     }
 
+    public void setFristTime() {
+        final SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putLong("current_time", System.currentTimeMillis());
+        editor.apply();
+    }
+
+    public long getFristTime() {
+        return mPreferences.getLong("current_time", System.currentTimeMillis());
+    }
+
 
 }

@@ -25,6 +25,7 @@ import android.provider.MediaStore.Audio.AudioColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.alium.orin.model.PlaylistSong;
 import com.alium.orin.model.Song;
 import com.alium.orin.loader.SongLoader;
 import com.alium.orin.soundcloud.HomeSound;
@@ -190,11 +191,11 @@ public class MusicPlaybackQueueStore extends SQLiteOpenHelper {
                     values.put(AudioColumns.ARTIST_ID, song.artistId);
                     values.put(AudioColumns.ARTIST, song.artistName);
 
-                    if (song instanceof HomeSound.ContentsBeanX.ContentsBean) {
+                    if (!song.isLocalSong()) {
                         values.put(IS_LOCAL, 0);
                         values.put(ALBUM_IMAGE, song.getAlbum_images());
-                        values.put(SONG_PLAY_TIME, ((HomeSound.ContentsBeanX.ContentsBean) song).song_play_time);
-                        values.put(SONG_DOWNLOAD_URL, song.getStreamUrl());
+                        values.put(SONG_PLAY_TIME, song.getDuration());
+                        values.put(SONG_DOWNLOAD_URL, song.getPath());
                     } else {
                         values.put(IS_LOCAL, 1);
                     }

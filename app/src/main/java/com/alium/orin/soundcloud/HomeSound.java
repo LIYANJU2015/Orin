@@ -246,11 +246,6 @@ public class HomeSound implements Serializable{
             }
 
             @Override
-            public String getStreamUrl() {
-                return song_download_url;
-            }
-
-            @Override
             public int getPosition() {
                 return position;
             }
@@ -284,7 +279,7 @@ public class HomeSound implements Serializable{
             public boolean equals(Object o) {
                 if (super.equals(o)) {
                     Song song = (Song) o;
-                    if (!getStreamUrl().equals(song.getStreamUrl())) {
+                    if (!getPath().equals(song.getPath())) {
                         return false;
                     }
                     return true;

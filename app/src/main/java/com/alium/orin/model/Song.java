@@ -164,10 +164,6 @@ public class Song implements Parcelable, Serializable {
         return 0;
     }
 
-    public String getStreamUrl() {
-        return "";
-    }
-
     public boolean isLocalSong() {
         return true;
     }

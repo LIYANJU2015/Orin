@@ -29,6 +29,7 @@
         <me.zhanghai.android.materialprogressbar.MaterialProgressBar
             android:id="@+id/loading_mb"
             android:layout_gravity="center"
+            android:visibility="invisible"
             android:indeterminate="true"
             android:layout_width="60dp"
             android:layout_height="60dp" />

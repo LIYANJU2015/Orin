@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.alium.orin.App;
+import com.alium.orin.util.Util;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.kabouzeid.appthemehelper.util.ATHUtil;
 
@@ -35,8 +36,6 @@ public class AnalogController extends View {
 
     String label;
 
-    private float ratio;
-    private float ratio2;
 
     public static int themeColor = ThemeStore.primaryColor(App.sContext);
 
@@ -51,13 +50,6 @@ public class AnalogController extends View {
     public AnalogController(Context context) {
         super(context);
         init();
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        int screen_width = display.getWidth();
-        int screen_height = display.getHeight();
-        ratio = (float)  screen_height / (float) 1920;
-        ratio2 = (float) screen_width / (float) 1080;
-        ratio = Math.min(ratio, ratio2);
         themeColor = ThemeStore.primaryColor(App.sContext);
     }
 
@@ -75,8 +67,8 @@ public class AnalogController extends View {
         textPaint = new Paint();
         textPaint.setColor(Color.WHITE);
         textPaint.setStyle(Paint.Style.FILL);
-        textPaint.setTextSize(33 * ratio);
         textPaint.setFakeBoldText(true);
+        textPaint.setTextSize(Util.sp2px(getContext(), 12));
         textPaint.setTextAlign(Paint.Align.CENTER);
         circlePaint = new Paint();
         circlePaint.setColor(Color.parseColor("#222222"));
@@ -88,7 +80,7 @@ public class AnalogController extends View {
         linePaint = new Paint();
         linePaint.setColor(themeColor);
 //        linePaint.setColor(Color.parseColor("#FFA036"));
-        linePaint.setStrokeWidth(7 * ratio);
+        linePaint.setStrokeWidth(7);
         angle = "0.0";
         label = "Label";
     }
@@ -128,7 +120,7 @@ public class AnalogController extends View {
         canvas.drawCircle(midx, midy, radius * ((float) 13 / 15), circlePaint);
         circlePaint.setColor(Color.parseColor("#47464b"));
         canvas.drawCircle(midx, midy, radius * ((float) 11 / 15), circlePaint);
-        canvas.drawText(label, midx, midy + (float) (radius * 1.1), textPaint);
+        canvas.drawText(label, midx,Util.dip2px(getContext(), 3)+ midy + (float) (radius * 1.1), textPaint);
         canvas.drawLine(x1, y1, x2, y2, linePaint);
 
     }

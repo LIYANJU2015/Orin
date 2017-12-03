@@ -104,6 +104,15 @@ public class MiniPlayerFragment extends AbsMusicServiceFragment implements Music
     public void onServiceConnected() {
         updateSongTitle();
         updatePlayPauseDrawableState(false);
+        updateMiniPlayerBg();
+    }
+
+    private void updateMiniPlayerBg() {
+        BitmapRequestBuilder<?, Bitmap> request = SongGlideRequest.Builder.from(Glide.with(mContext),
+                MusicPlayerRemote.getCurrentSong())
+                .checkIgnoreMediaStore(mContext)
+                .asBitmap().build();
+        request.transform(new BlurTransformation.Builder(mContext).build()).into(mimiPlayerIVBg);
     }
 
     private boolean isShowLoading = false;
@@ -116,14 +125,7 @@ public class MiniPlayerFragment extends AbsMusicServiceFragment implements Music
         if (miniPlayerPlayPauseButton.getVisibility() == View.INVISIBLE) {
             miniPlayerPlayPauseButton.setVisibility(View.VISIBLE);
         }
-//        SongGlideRequest.Builder.from(Glide.with(this), MusicPlayerRemote.getCurrentSong())
-//                .checkIgnoreMediaStore(mContext).build().placeholder(R.drawable.while_bg)
-//                .into(mimiPlayerIVBg);
-        BitmapRequestBuilder<?, Bitmap> request = SongGlideRequest.Builder.from(Glide.with(mContext),
-                MusicPlayerRemote.getCurrentSong())
-                .checkIgnoreMediaStore(mContext)
-                .asBitmap().build();
-        request.transform(new BlurTransformation.Builder(mContext).build()).into(mimiPlayerIVBg);
+        updateMiniPlayerBg();
     }
 
     @Override

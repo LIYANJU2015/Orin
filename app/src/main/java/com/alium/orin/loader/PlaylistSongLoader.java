@@ -51,7 +51,9 @@ public class PlaylistSongLoader {
         try {
             return context.getContentResolver().query(
                     PlayListProvider.PlayListSong.URI,null,
-                    PlayListProvider.PlayListSong.TITLE + " != ''", null,
+                    PlayListProvider.PlayListSong.PLAY_LIST_ID +" = " + playlistId
+                            + " and " + PlayListProvider.PlayListSong.TITLE + " != ''",
+                    null,
                     PlayListProvider.PlayListSong.PLAY_ORDER);
         } catch (SecurityException e) {
             return null;

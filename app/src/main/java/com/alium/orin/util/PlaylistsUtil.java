@@ -68,7 +68,7 @@ public class PlaylistsUtil {
 
     public static void deletePlaylists(@NonNull final Context context, @NonNull final ArrayList<Playlist> playlists) {
         final StringBuilder selection = new StringBuilder();
-        selection.append(MediaStore.Audio.Playlists._ID + " IN (");
+        selection.append(PlayListProvider.PlayList._ID + " IN (");
         for (int i = 0; i < playlists.size(); i++) {
             selection.append(playlists.get(i).id);
             if (i < playlists.size() - 1) {
@@ -78,6 +78,7 @@ public class PlaylistsUtil {
         selection.append(")");
         try {
             context.getContentResolver().delete(PlayListProvider.PlayList.URI, selection.toString(), null);
+            context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -101,7 +102,8 @@ public class PlaylistsUtil {
         try {
             try {
 
-                cursor = resolver.query(PlayListProvider.PlayListSong.URI, projection, null, null, null);
+                cursor = resolver.query(PlayListProvider.PlayListSong.URI, projection, PlayListProvider.PlayListSong.PLAY_LIST_ID + "=" + playlistId,
+                        null, null);
 
                 if (cursor != null && cursor.moveToFirst()) {
                     base = cursor.getInt(0) + 1;
@@ -158,8 +160,8 @@ public class PlaylistsUtil {
     public static void removeFromPlaylist(@NonNull final Context context,
                                           @NonNull final Song song,
                                           int playlistId) {
-        String selection = PlayListProvider.PlayListSong.ID + " = ?";
-        String[] selectionArgs = new String[]{String.valueOf(song.id)};
+        String selection = PlayListProvider.PlayListSong.PLAY_LIST_ID + " = ？" + PlayListProvider.PlayListSong.ID + " = ?";
+        String[] selectionArgs = new String[]{String.valueOf(playlistId), String.valueOf(song.id)};
 
         try {
             context.getContentResolver().delete(PlayListProvider.PlayListSong.URI, selection, selectionArgs);
@@ -173,7 +175,7 @@ public class PlaylistsUtil {
         for (int i = 0; i < selectionArgs.length; i++) {
             selectionArgs[i] = String.valueOf(songs.get(i).idInPlayList);
         }
-        String selection =PlayListProvider.PlayListSong._ID + " in (";
+        String selection = PlayListProvider.PlayListSong._ID + " in (";
         //noinspection unused
         for (String selectionArg : selectionArgs) selection += "?, ";
         selection = selection.substring(0, selection.length() - 2) + ")";
@@ -188,7 +190,8 @@ public class PlaylistsUtil {
         if (playlistId != -1) {
             try {
                 Cursor c = context.getContentResolver().query(PlayListProvider.PlayListSong.URI,
-                        new String[]{PlayListProvider.PlayListSong.ID}, PlayListProvider.PlayListSong.ID + "=?", new String[]{String.valueOf(songId)}, null);
+                        new String[]{PlayListProvider.PlayListSong.ID}, PlayListProvider.PlayListSong.PLAY_LIST_ID + " = " + playlistId
+                                + " and " + PlayListProvider.PlayListSong.ID + "=?", new String[]{String.valueOf(songId)}, null);
                 int count = 0;
                 if (c != null) {
                     count = c.getCount();
@@ -210,13 +213,15 @@ public class PlaylistsUtil {
         contentValues.put(PlayListProvider.PlayListSong.PLAY_ORDER, to);
 
         Cursor cursor = resolver.query(PlayListProvider.PlayListSong.URI, new String[]{PlayListProvider.PlayListSong._ID},
-                PlayListProvider.PlayListSong.PLAY_ORDER + " = " + to ,
+                PlayListProvider.PlayListSong.PLAY_LIST_ID + " = " + playlistId + " and "
+                        + PlayListProvider.PlayListSong.PLAY_ORDER + " = " + to ,
                 null, null);
         if (cursor != null && cursor.moveToFirst()) {
             int id = cursor.getInt(cursor.getColumnIndex(PlayListProvider.PlayListSong._ID));
 
             int updateId = resolver.update(PlayListProvider.PlayListSong.URI, contentValues,
-                    PlayListProvider.PlayListSong.PLAY_ORDER + " = " + from,
+                    PlayListProvider.PlayListSong.PLAY_LIST_ID + " = " + playlistId + " and "
+                            + PlayListProvider.PlayListSong.PLAY_ORDER + " = " + from,
                     null);
             LogUtil.v("playlist", "moveItem11 updateId " + updateId);
 

@@ -503,7 +503,6 @@ public class EqualizerActivity extends AbsMusicServiceActivity {
         }
 
         presetSpinner.setAdapter(equalizerPresetSpinnerAdapter);
-        presetSpinner.setDropDownWidth((screen_width * 3) / 4);
         presetSpinner.setSelection(sEqualizerModel.getPresetPos());
 
         presetSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

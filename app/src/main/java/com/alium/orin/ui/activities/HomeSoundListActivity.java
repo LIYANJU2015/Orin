@@ -124,6 +124,12 @@ public class HomeSoundListActivity extends AbsSlidingMusicPanelActivity {
                 });
                 final ImageView overflowButton = holder.getView(R.id.menu);
                 overflowButton.setOnClickListener(new SongMenuHelper.OnClickSongMenu(HomeSoundListActivity.this) {
+
+                    @Override
+                    public int getMenuRes() {
+                        return R.menu.menu_item_online_song;
+                    }
+
                     @Override
                     public Song getSong() {
                         return song;

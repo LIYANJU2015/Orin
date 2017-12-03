@@ -107,8 +107,14 @@ public class HomeFragment extends AbsMusicServiceFragment {
             @Override
             protected HomeSound doInBackground(Void... voids) {
                 try {
+                    if (App.isLoadLocalHomeSound() && App.sHomeSound != null) {
+                        LogUtil.v("home", "load local homesound ....");
+                        return App.sHomeSound;
+                    }
+
                     Object obj = ACache.get(mContext).getAsObject(SoundCloudClient.HOME_SOUND_URL);
                     if (obj != null) {
+                        LogUtil.v("home", "load ACache homesound ....");
                         return (HomeSound) obj;
                     }
                 } catch (Exception e) {

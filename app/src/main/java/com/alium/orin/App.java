@@ -8,12 +8,19 @@ import android.support.v4.content.ContextCompat;
 import com.alium.orin.appshortcuts.DynamicShortcutManager;
 
 
+import com.alium.orin.soundcloud.ContentsBean2Deserializer;
 import com.alium.orin.soundcloud.HomeSound;
+import com.alium.orin.soundcloud.HomeSoundDeserializer;
+import com.alium.orin.util.LogUtil;
+import com.alium.orin.util.PreferenceUtil;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.kabouzeid.appthemehelper.ThemeStore;
 
 import org.eclipse.egit.github.core.client.GsonUtils;
 
 import java.io.InputStream;
+import java.util.Locale;
 
 
 /**
@@ -27,17 +34,20 @@ public class App extends Application {
 
     public static HomeSound sHomeSound;
 
+    public static boolean sIsColdLaunch = false;
+
     @Override
     public void onCreate() {
         super.onCreate();
 
-        // Set up Crashlytics, disabled for debug builds
-//        Crashlytics crashlyticsKit = new Crashlytics.Builder()
-//                .core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build())
-//                .build();
-//        Fabric.with(this, crashlyticsKit);
+        LogUtil.v("App", "onCreate");
+        sIsColdLaunch = true;
 
         sContext = getApplicationContext();
+
+        PreferenceUtil.getInstance(this).setFristTime();
+
+        initLocalHomeSound();
 
         // Set up dynamic shortcuts
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
@@ -50,8 +60,20 @@ public class App extends Application {
         ThemeStore.editTheme(this)
                 .accentColor(ContextCompat.getColor(this, R.color.colorAccent))
                 .commit();
+    }
 
-        initLocalHomeSound();
+    public static boolean isLoadLocalHomeSound() {
+        String language = Locale.getDefault().getLanguage().toLowerCase();
+        long fristTime = PreferenceUtil.getInstance(App.sContext).getFristTime();
+        if (language.equals("us") && language.equals("en")) {
+            return false;
+        }
+
+        if (Math.abs(System.currentTimeMillis() - fristTime) >= 1000 * 60 * 60 * 24 * 5) {
+            return false;
+        }
+
+        return true;
     }
 
     private void initLocalHomeSound() {
@@ -64,7 +86,11 @@ public class App extends Application {
                     byte[]  buffer = new byte[lenght];
                     is.read(buffer);
                     String result = new String(buffer, "utf8");
-                    sHomeSound = GsonUtils.fromJson(result, HomeSound.class);
+                    GsonBuilder gsonBuilder = new GsonBuilder();
+                    gsonBuilder.registerTypeAdapter(HomeSound.ContentsBeanX.class, new HomeSoundDeserializer());
+                    gsonBuilder.registerTypeAdapter(HomeSound.ContentsBean2.class, new ContentsBean2Deserializer());
+                    Gson gson = gsonBuilder.create();
+                    sHomeSound = gson.fromJson(result, HomeSound.class);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

@@ -208,7 +208,11 @@ public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, S
 
                 @Override
                 public int getMenuRes() {
-                    return getSongMenuRes();
+                    if (getSong().isLocalSong()) {
+                        return getSongMenuRes();
+                    } else {
+                        return R.menu.menu_item_online_song;
+                    }
                 }
 
                 @Override

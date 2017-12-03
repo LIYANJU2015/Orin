@@ -182,7 +182,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
         if (song.isLocalSong()) {
             url = MusicUtil.getSongFileUri(song.id).toString();
         } else {
-            url = song.getStreamUrl() + "?client_id=" + SoundCloudClient.CLIENT_ID;
+            url = song.getPath() + "?client_id=" + SoundCloudClient.CLIENT_ID;
         }
         LogUtil.v(TAG, " >>getTrackUri url " + url);
         return url;
