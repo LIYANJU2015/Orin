@@ -97,7 +97,7 @@ public class MusicPlaybackQueueStore extends SQLiteOpenHelper {
         builder.append(" INT NOT NULL,");
 
         builder.append(AudioColumns.ALBUM);
-        builder.append(" STRING NOT NULL,");
+        builder.append(" STRING,");
 
         builder.append(AudioColumns.ARTIST_ID);
         builder.append(" INT NOT NULL,");

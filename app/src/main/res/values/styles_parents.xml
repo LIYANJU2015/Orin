@@ -38,7 +38,7 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowActionBarOverlay">true</item>
         <item name="windowActionBarOverlay">true</item>
-
+        <item name="android:windowBackground">@color/md_white_1000</item>
         <item name="md_dark_theme">false</item>
 
         <item name="roundSelector">@drawable/round_selector</item>

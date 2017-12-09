@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.admodule.AdModule;
 import com.alium.orin.adapter.base.MediaEntryViewHolder;
 import com.alium.orin.glide.SongGlideRequest;
 import com.alium.orin.glide.artistimage.ArtistImage;
@@ -21,6 +22,7 @@ import com.alium.orin.soundcloud.Track;
 import com.alium.orin.util.ArtistSignatureUtil;
 import com.alium.orin.util.MusicUtil;
 import com.alium.orin.util.NavigationUtil;
+import com.alium.orin.util.StatReportUtils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -224,6 +226,10 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                     playList = new ArrayList<>();
                     playList.add(contentsBean);
                     MusicPlayerRemote.openQueue(playList, 0, true);
+
+                    AdModule.getInstance().getAdMob().showInterstitialAd();
+
+                    StatReportUtils.trackCustomEvent("search_page", "listItem click");
                     break;
             }
         }

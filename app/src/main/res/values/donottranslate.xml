@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Ọrin</string>
+    <string name="app_name" translatable="false">Music Plus</string>
 
     <string name="aliu_abdul_mujib" translatable="false">Aliu Abdul-Mujib</string>
     <string name="lagos_nigeria" translatable="false">Lagos, Nigeria</string>

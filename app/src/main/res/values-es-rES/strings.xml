@@ -271,4 +271,7 @@
     <!-- App Shortcuts -->
     <string name="app_shortcut_shuffle_all_short">Mezclar</string>
     <string name="app_shortcut_top_tracks_short">Los mejores temas</string>
+
+    <string name="home">Inicio</string>
+
 </resources>

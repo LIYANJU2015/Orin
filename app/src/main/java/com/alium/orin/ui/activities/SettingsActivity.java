@@ -291,18 +291,18 @@ public class SettingsActivity extends AbsBaseActivity implements ColorChooserDia
                 });
             }
 
-            final Preference equalizer = findPreference("equalizer");
-            if (!hasEqualizer()) {
-                equalizer.setEnabled(false);
-                equalizer.setSummary(getResources().getString(R.string.no_equalizer));
-            }
-            equalizer.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    NavigationUtil.openEqualizer(getActivity());
-                    return true;
-                }
-            });
+//            final Preference equalizer = findPreference("equalizer");
+//            if (!hasEqualizer()) {
+//                equalizer.setEnabled(false);
+//                equalizer.setSummary(getResources().getString(R.string.no_equalizer));
+//            }
+//            equalizer.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+//                @Override
+//                public boolean onPreferenceClick(Preference preference) {
+//                    NavigationUtil.openEqualizer(getActivity());
+//                    return true;
+//                }
+//            });
 
             updateNowPlayingScreenSummary();
         }

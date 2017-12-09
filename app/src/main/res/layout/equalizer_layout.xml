@@ -28,18 +28,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="@string/equalizer_text"
+            android:text="@string/equalizer"
             android:textColor="#FFFFFF"
             android:textSize="20sp" />
+
+        <ImageView
+            android:id="@+id/setting_iv"
+            android:layout_marginRight="10dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            app:srcCompat="@drawable/ic_settings_white_24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
         <android.support.v7.widget.SwitchCompat
             android:id="@+id/equalizer_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_marginRight="8dp"
             android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
             android:checked="false"
+            android:layout_toLeftOf="@id/setting_iv"
             app:theme="@style/CustomSwitch" />
 
     </RelativeLayout>

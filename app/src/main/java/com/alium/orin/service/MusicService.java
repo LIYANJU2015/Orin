@@ -35,6 +35,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.alium.orin.App;
 import com.alium.orin.R;
 import com.alium.orin.appwidgets.AppWidgetBig;
 import com.alium.orin.appwidgets.AppWidgetClassic;
@@ -63,6 +64,7 @@ import com.bumptech.glide.BitmapRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.vincan.medialoader.MediaLoader;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -183,6 +185,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
             url = MusicUtil.getSongFileUri(song.id).toString();
         } else {
             url = song.getPath() + "?client_id=" + SoundCloudClient.CLIENT_ID;
+            url = MediaLoader.getInstance(App.sContext).getProxyUrl(url);
         }
         LogUtil.v(TAG, " >>getTrackUri url " + url);
         return url;

@@ -275,4 +275,6 @@
     <string name="app_shortcut_top_tracks_short">Bài hát hàng đầu</string>
     <string name="app_shortcut_last_added_long">@string/last_added</string>
     <string name="app_shortcut_last_added_short">@string/last_added</string>
+
+    <string name="home">Trang chủ</string>
 </resources>

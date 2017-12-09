@@ -12,7 +12,7 @@
         android:id="@+id/action_toggle_equalizer"
         android:icon="@drawable/ic_equalizer_black_24dp"
         android:orderInCategory="1"
-        android:title="@string/equalizer_text"
+        android:title="@string/equalizer"
         app:showAsAction="ifRoom" />
 
 

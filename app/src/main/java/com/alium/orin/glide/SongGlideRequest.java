@@ -86,6 +86,15 @@ public class SongGlideRequest {
                     .animate(DEFAULT_ANIMATION)
                     .signature(createSignature(builder.song));
         }
+
+        public BitmapRequestBuilder<?, Bitmap> build2() {
+            //noinspection unchecked
+            return createBaseRequest(builder.requestManager, builder.song, builder.ignoreMediaStore)
+                    .asBitmap()
+                    .diskCacheStrategy(DEFAULT_DISK_CACHE_STRATEGY)
+                    .animate(DEFAULT_ANIMATION)
+                    .signature(createSignature(builder.song));
+        }
     }
 
     public static class PaletteBuilder {

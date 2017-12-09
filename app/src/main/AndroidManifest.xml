@@ -15,6 +15,9 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
     <application
         android:name="com.alium.orin.App"
         android:allowBackup="true"
@@ -203,6 +206,40 @@
 
        <activity android:name=".ui.activities.EqualizerActivity"
            android:launchMode="singleTask"/>
+
+        <receiver
+            android:name=".util.InstallReferrerReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
+
+        <provider
+            android:name="com.tencent.mid.api.MidProvider"
+            android:authorities="com.gomusic.musicplus.TENCENT.MID.V3"
+            tools:replace="android:authorities"
+            android:exported="true" >
+        </provider>
+        <meta-data tools:replace="android:value" android:name="TA_APPKEY" android:value="A77CEYD9IS8G"/>
+        <!-- 请将value改为app发布对应的渠道，不同的发布渠道使用不同的名字 < -->
+        <meta-data tools:replace="android:value" android:name="InstallChannel" android:value="google_play"/>
+        <!-- 注意：若填写的渠道为纯数字字符串类型，请不要超过int表示的范围！ < -->
+        <meta-data
+            android:name="BUGLY_APPID"
+            android:value="c80c37a36a" />
+        <!-- 配置APP版本号 -->
+        <meta-data
+            android:name="BUGLY_APP_VERSION"
+            android:value="1.0.0" />
+        <!-- 配置APP渠道号 -->
+        <meta-data
+            android:name="BUGLY_APP_CHANNEL"
+            android:value="google_play" />
+        <!-- 配置Bugly调试模式（true或者false）-->
+        <meta-data
+            android:name="BUGLY_ENABLE_DEBUG"
+            android:value="false" />
 
     </application>
 

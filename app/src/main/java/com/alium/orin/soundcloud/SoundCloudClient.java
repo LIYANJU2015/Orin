@@ -25,7 +25,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SoundCloudClient {
 
-    public static final String CLIENT_ID = "LegNTza81OuwVaDfYELQW1X71tY1sot8";
+    public static final String CLIENT_ID = "8a73a4efdb1f7a965c562f75716551ee";//8a73a4efdb1f7a965c562f75716551ee //LegNTza81OuwVaDfYELQW1X71tY1sot8
 
     public static final String HOME_SOUND_URL = "http://navigation.api.hk.goforandroid.com/api/v1/website/navigations/";
     public static final String SOUND_CLOUD_API_URL = "https://api.soundcloud.com";

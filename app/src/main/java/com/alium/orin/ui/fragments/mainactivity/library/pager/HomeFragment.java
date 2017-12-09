@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.admodule.AdModule;
 import com.alium.orin.App;
 import com.alium.orin.R;
 import com.alium.orin.helper.MusicPlayerRemote;
@@ -23,6 +24,7 @@ import com.alium.orin.ui.activities.HomeSoundListActivity;
 import com.alium.orin.ui.fragments.AbsMusicServiceFragment;
 import com.alium.orin.util.ACache;
 import com.alium.orin.util.LogUtil;
+import com.alium.orin.util.StatReportUtils;
 import com.bumptech.glide.Glide;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.zhy.adapter.recyclerview.MultiItemTypeAdapter;
@@ -99,6 +101,8 @@ public class HomeFragment extends AbsMusicServiceFragment {
         if (mDatas.size() == 0) {
             showHomeSoundData();
         }
+
+        AdModule.getInstance().getFacebookAd().loadAd(true, "1305172892959949_1313403128803592");
     }
 
     private void showHomeSoundData() {
@@ -173,7 +177,7 @@ public class HomeFragment extends AbsMusicServiceFragment {
 
 
     private void showHomeSoundView(HomeSound homeSound) {
-        if (activity.isFinishing()) {
+        if (activity == null || activity.isFinishing()) {
             return;
         }
 
@@ -222,10 +226,11 @@ public class HomeFragment extends AbsMusicServiceFragment {
 
             Glide.with(mContext).load(homeSoundInAdapter.contentsBean2.getContents().get(0).getAlbum_images()).crossFade()
                     .placeholder(R.drawable.default_album_art).error(R.drawable.default_album_art).centerCrop()
-                    .into((ImageView) holder.getView(R.id.item_album_iv));
+                    .into((ImageView) holder.getView(R.id.item_album_iv22));
             holder.setOnClickListener(R.id.home_single_relative, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    StatReportUtils.trackCustomEvent("home_page", "singleItem click");
                     HomeSoundListActivity.launch(mContext, homeSoundInAdapter.contentsBean2.getName());
                 }
             });
@@ -281,6 +286,7 @@ public class HomeFragment extends AbsMusicServiceFragment {
             holder.setOnClickListener(R.id.list_item_linear3, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    StatReportUtils.trackCustomEvent("home_page", "listItem click");
                     MusicPlayerRemote.openQueue(homeSoundInAdapter.list,
                             homeSoundInAdapter.list.get(2).getPosition(), true);
                 }

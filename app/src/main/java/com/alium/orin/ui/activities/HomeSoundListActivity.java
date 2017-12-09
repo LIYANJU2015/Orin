@@ -7,13 +7,18 @@ import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Advanceable;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.admodule.AdModule;
 import com.alium.orin.R;
+import com.alium.orin.adapter.AdViewWrapperAdapter;
 import com.alium.orin.glide.SongGlideRequest;
 import com.alium.orin.helper.MusicPlayerRemote;
 import com.alium.orin.helper.menu.SongMenuHelper;
@@ -21,7 +26,11 @@ import com.alium.orin.model.Song;
 import com.alium.orin.ui.activities.base.AbsSlidingMusicPanelActivity;
 import com.alium.orin.ui.fragments.mainactivity.library.pager.HomeFragment;
 import com.alium.orin.util.NavigationUtil;
+import com.alium.orin.util.StatReportUtils;
 import com.bumptech.glide.Glide;
+import com.facebook.ads.AdChoicesView;
+import com.facebook.ads.MediaView;
+import com.facebook.ads.NativeAd;
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
 import com.kabouzeid.appthemehelper.ThemeStore;
@@ -49,6 +58,8 @@ public class HomeSoundListActivity extends AbsSlidingMusicPanelActivity {
     private String mTitle;
 
     private ArrayList<Song> mData;
+
+    private CommonAdapter commonadapter;
 
     @Override
     protected View createContentView() {
@@ -98,10 +109,19 @@ public class HomeSoundListActivity extends AbsSlidingMusicPanelActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        AdModule.getInstance().getFacebookAd().loadAd(true, "1305172892959949_1313403128803592");
+    }
+
+    private AdViewWrapperAdapter adViewWrapperAdapter;
+
     private void setUpRecyclerView() {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         final GeneralItemAnimator animator = new RefactoredDefaultItemAnimator();
-        recyclerView.setAdapter(new CommonAdapter<Song>(this,
+
+        commonadapter = new CommonAdapter<Song>(this,
                 R.layout.item_list, mData) {
             @Override
             protected void convert(final ViewHolder holder, final Song song,
@@ -119,7 +139,15 @@ public class HomeSoundListActivity extends AbsSlidingMusicPanelActivity {
                 holder.setOnClickListener(R.id.list_item_frame, new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        MusicPlayerRemote.openQueue(mData, holder.getAdapterPosition(), true);
+                        int position = holder.getAdapterPosition();
+                        if (adViewWrapperAdapter != null) {
+                            position = adViewWrapperAdapter.getAdViewCountBeforeByPostion(holder.getAdapterPosition());
+                            position = holder.getAdapterPosition() - position;
+                        }
+                        AdModule.getInstance().getAdMob().showInterstitialAd();
+                        MusicPlayerRemote.openQueue(mData, position, true);
+
+                        StatReportUtils.trackCustomEvent("home_list_page", "item click");
                     }
                 });
                 final ImageView overflowButton = holder.getView(R.id.menu);
@@ -136,7 +164,49 @@ public class HomeSoundListActivity extends AbsSlidingMusicPanelActivity {
                     }
                 });
             }
-        });
+        };
+
+        RecyclerView.Adapter adapter;
+        NativeAd nativeAd = AdModule.getInstance().getFacebookAd().getNativeAd();
+        if (nativeAd != null && nativeAd.isAdLoaded()) {
+            adViewWrapperAdapter = new AdViewWrapperAdapter(commonadapter);
+            adViewWrapperAdapter.addAdView(22, new AdViewWrapperAdapter.
+                    AdViewItem(setUpNativeAdView(nativeAd), 1));
+            adapter = adViewWrapperAdapter;
+            StatReportUtils.trackCustomEvent("home_list_page", "ad show");
+        } else {
+            adapter = commonadapter;
+        }
+        recyclerView.setAdapter(adapter);
         recyclerView.setItemAnimator(animator);
+    }
+
+    private View setUpNativeAdView(NativeAd nativeAd) {
+        nativeAd.unregisterView();
+
+        View adView = LayoutInflater.from(this).inflate(R.layout.home_list_ad_item, null);
+
+        FrameLayout adChoicesFrame = (FrameLayout)adView.findViewById(R.id.fb_adChoices2);
+        ImageView nativeAdIcon = (ImageView) adView.findViewById(R.id.image_ad);
+        TextView nativeAdTitle = (TextView) adView.findViewById(R.id.title);
+        TextView nativeAdBody = (TextView) adView.findViewById(R.id.text);
+        TextView nativeAdCallToAction = (TextView) adView.findViewById(R.id.call_btn_tv);
+
+        nativeAdCallToAction.setText(nativeAd.getAdCallToAction());
+        nativeAdTitle.setText(nativeAd.getAdTitle());
+        nativeAdBody.setText(nativeAd.getAdBody());
+
+        // Downloading and setting the ad icon.
+        NativeAd.Image adIcon = nativeAd.getAdIcon();
+        NativeAd.downloadAndDisplayImage(adIcon, nativeAdIcon);
+
+        // Add adChoices icon
+        AdChoicesView adChoicesView = new AdChoicesView(this, nativeAd, true);
+        adChoicesFrame.addView(adChoicesView, 0);
+        adChoicesFrame.setVisibility(View.VISIBLE);
+
+        nativeAd.registerViewForInteraction(adView);
+
+        return adView;
     }
 }

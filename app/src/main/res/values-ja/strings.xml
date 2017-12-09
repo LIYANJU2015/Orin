@@ -198,4 +198,5 @@
     <string name="username">ユーザー名</string>
     <string name="password">パスワード</string>
     <!-- App Shortcuts -->
+    <string name="home">自宅</string>
 </resources>

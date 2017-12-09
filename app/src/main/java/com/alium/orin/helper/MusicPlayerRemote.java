@@ -23,6 +23,7 @@ import com.alium.orin.model.Song;
 import com.alium.orin.R;
 import com.alium.orin.loader.SongLoader;
 import com.alium.orin.service.MusicService;
+import com.alium.orin.util.LogUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -214,9 +215,9 @@ public class MusicPlayerRemote {
      * Async
      */
     public static void openQueue(final ArrayList<Song> queue, final int startPosition, final boolean startPlaying) {
-        Log.v("xx", "openQueue>>>>>>");
+        LogUtil.v("xx", "openQueue>>>>>> startPosition " + startPosition);
         if (!tryToHandleOpenPlayingQueue(queue, startPosition, startPlaying) && musicService != null) {
-            Log.v("xx", "openQueue into >>>>>>");
+            LogUtil.v("xx", "openQueue into >>>>>>");
             musicService.openQueue(queue, startPosition, startPlaying);
         }
     }

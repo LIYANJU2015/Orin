@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.admodule.AdModule;
 import com.alium.orin.R;
 import com.alium.orin.dialogs.ChangelogDialog;
 import com.alium.orin.glide.SongGlideRequest;
@@ -48,6 +49,10 @@ import com.kabouzeid.appthemehelper.ThemeStore;
 import com.kabouzeid.appthemehelper.util.ATHUtil;
 import com.kabouzeid.appthemehelper.util.NavigationViewUtil;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.vincan.medialoader.DefaultConfigFactory;
+import com.vincan.medialoader.MediaLoader;
+import com.vincan.medialoader.MediaLoaderConfig;
+import com.vincan.medialoader.data.file.naming.Md5FileNameCreator;
 
 import java.util.ArrayList;
 
@@ -109,6 +114,9 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
         if (!checkShowIntro()) {
             checkShowChangelog();
         }
+
+        AdModule.getInstance().getAdMob().initInterstitialAd();
+        AdModule.getInstance().getAdMob().requestRewardedVideoAd(false);
     }
 
     private void setMusicChooser(int key) {
@@ -385,32 +393,32 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
     }
 
     private boolean checkShowIntro() {
-        if (!PreferenceUtil.getInstance(this).introShown()) {
-            PreferenceUtil.getInstance(this).setIntroShown();
-            ChangelogDialog.setChangelogRead(this);
-            blockRequestPermissions = true;
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    startActivityForResult(new Intent(MainActivity.this, AppIntroActivity.class), APP_INTRO_REQUEST);
-                }
-            }, 50);
-            return true;
-        }
+//        if (!PreferenceUtil.getInstance(this).introShown()) {
+//            PreferenceUtil.getInstance(this).setIntroShown();
+//            ChangelogDialog.setChangelogRead(this);
+//            blockRequestPermissions = true;
+//            new Handler().postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    startActivityForResult(new Intent(MainActivity.this, AppIntroActivity.class), APP_INTRO_REQUEST);
+//                }
+//            }, 50);
+//            return true;
+//        }
         return false;
     }
 
     private boolean checkShowChangelog() {
-        try {
-            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            int currentVersion = pInfo.versionCode;
-            if (currentVersion != PreferenceUtil.getInstance(this).getLastChangelogVersion()) {
-                ChangelogDialog.create().show(getSupportFragmentManager(), "CHANGE_LOG_DIALOG");
-                return true;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+//            int currentVersion = pInfo.versionCode;
+//            if (currentVersion != PreferenceUtil.getInstance(this).getLastChangelogVersion()) {
+//                ChangelogDialog.create().show(getSupportFragmentManager(), "CHANGE_LOG_DIALOG");
+//                return true;
+//            }
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
         return false;
     }
 

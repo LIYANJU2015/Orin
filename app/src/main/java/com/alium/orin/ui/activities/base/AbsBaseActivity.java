@@ -17,6 +17,7 @@ import android.view.View;
 
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.alium.orin.R;
+import com.tencent.stat.StatService;
 
 /**
  * @author Karim Abou Zeid (kabouzeid)
@@ -57,6 +58,13 @@ public abstract class AbsBaseActivity extends AbsThemeActivity {
                 onHasPermissionsChanged(hasPermissions);
             }
         }
+        StatService.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        StatService.onPause(this);
     }
 
     protected void onHasPermissionsChanged(boolean hasPermissions) {

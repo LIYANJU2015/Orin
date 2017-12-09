@@ -42,5 +42,10 @@
 
 -keep class !android.support.v7.internal.view.menu.**,** {*;}
 
+-keep class com.tencent.stat.* {*;}
+-keep class com.tencent.mid.* {*;}
+-dontwarn com.tencent.bugly.**
+-keep public class com.tencent.bugly.**{*;}
+
 -dontwarn
 -ignorewarnings

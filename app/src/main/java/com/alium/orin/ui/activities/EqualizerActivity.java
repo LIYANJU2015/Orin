@@ -13,6 +13,8 @@ import android.media.audiofx.PresetReverb;
 import android.media.audiofx.Visualizer;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.widget.ImageViewCompat;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.SwitchCompat;
 import android.view.Display;
 import android.view.Gravity;
@@ -36,6 +38,7 @@ import com.alium.orin.helper.MusicPlayerRemote;
 import com.alium.orin.model.EqualizerModel;
 import com.alium.orin.ui.activities.base.AbsMusicServiceActivity;
 import com.alium.orin.util.LogUtil;
+import com.alium.orin.util.NavigationUtil;
 import com.alium.orin.util.PreferenceUtil;
 import com.alium.orin.util.Util;
 import com.alium.orin.views.AnalogController;
@@ -302,6 +305,13 @@ public class EqualizerActivity extends AbsMusicServiceActivity {
         ratio2 = (float) screen_width / (float) 1080;
         ratio = Math.min(ratio, ratio2);
 
+        ImageView settingIV = (ImageView) findViewById(R.id.setting_iv);
+        settingIV.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                NavigationUtil.openEqualizer(EqualizerActivity.this);
+            }
+        });
         equalizerSwitch = (SwitchCompat) findViewById(R.id.equalizer_switch);
         equalizerSwitch.setChecked(sEqualizerModel.isEqualizerEnabled());
         equalizerSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

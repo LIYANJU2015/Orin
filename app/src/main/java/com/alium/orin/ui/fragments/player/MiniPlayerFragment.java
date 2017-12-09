@@ -111,7 +111,7 @@ public class MiniPlayerFragment extends AbsMusicServiceFragment implements Music
         BitmapRequestBuilder<?, Bitmap> request = SongGlideRequest.Builder.from(Glide.with(mContext),
                 MusicPlayerRemote.getCurrentSong())
                 .checkIgnoreMediaStore(mContext)
-                .asBitmap().build();
+                .asBitmap().build2();
         request.transform(new BlurTransformation.Builder(mContext).build()).into(mimiPlayerIVBg);
     }
 

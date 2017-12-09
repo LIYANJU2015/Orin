@@ -173,7 +173,7 @@ public class AboutActivity extends AbsBaseActivity implements View.OnClickListen
         } else if (v == licenses) {
             showLicenseDialog();
         } else if (v == intro) {
-            startActivity(new Intent(this, AppIntroActivity.class));
+//            startActivity(new Intent(this, AppIntroActivity.class));
         } else if (v == addToGooglePlusCircles) {
             openUrl(GOOGLE_PLUS);
         } else if (v == followOnTwitter) {
