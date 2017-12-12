@@ -26,6 +26,7 @@
             android:layout_width="match_parent"
             app:elevation="0dp"
             android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|enterAlways"
             tools:ignore="UnusedAttribute">
 
             <FrameLayout
@@ -54,10 +55,11 @@
                 android:layout_height="wrap_content"
                 android:background="?colorPrimary"
                 android:paddingBottom="4.0dip"
+                app:tabPaddingStart="6dp"
+                app:tabPaddingEnd="6dp"
                 app:tabIndicatorColor="@color/colorAccentReal"
                 app:tabBackground="?selectableItemBackgroundBorderless"
                 app:tabMinWidth="@dimen/tablayout_indicator_size_min"
-                app:tabMaxWidth="@dimen/tablayout_indicator_size_max"
                 app:tabSelectedTextColor="@color/colorPrimaryTextWhite"
                 app:tabTextColor="@color/colorSubTextWhite"
                 app:tabGravity="center"

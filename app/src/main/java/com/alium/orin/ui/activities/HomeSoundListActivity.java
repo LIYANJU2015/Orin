@@ -3,14 +3,12 @@ package com.alium.orin.ui.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Advanceable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -19,17 +17,14 @@ import android.widget.TextView;
 import com.admodule.AdModule;
 import com.alium.orin.R;
 import com.alium.orin.adapter.AdViewWrapperAdapter;
-import com.alium.orin.glide.SongGlideRequest;
 import com.alium.orin.helper.MusicPlayerRemote;
 import com.alium.orin.helper.menu.SongMenuHelper;
 import com.alium.orin.model.Song;
 import com.alium.orin.ui.activities.base.AbsSlidingMusicPanelActivity;
-import com.alium.orin.ui.fragments.mainactivity.library.pager.HomeFragment;
-import com.alium.orin.util.NavigationUtil;
+import com.alium.orin.ui.fragments.mainactivity.library.pager.SoundCloudFragment;
 import com.alium.orin.util.StatReportUtils;
 import com.bumptech.glide.Glide;
 import com.facebook.ads.AdChoicesView;
-import com.facebook.ads.MediaView;
 import com.facebook.ads.NativeAd;
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
@@ -85,7 +80,7 @@ public class HomeSoundListActivity extends AbsSlidingMusicPanelActivity {
         setNavigationbarColorAuto();
         setTaskDescriptionColorAuto();
 
-        mData = HomeFragment.getHomeSoundContents(mTitle);
+        mData = SoundCloudFragment.getHomeSoundContents(mTitle);
 
         setUpRecyclerView();
 

@@ -1,7 +1,5 @@
 package com.alium.orin.ui.fragments.mainactivity.library.pager;
 
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,27 +10,28 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-import com.admodule.AdModule;
 import com.alium.orin.App;
 import com.alium.orin.R;
-import com.alium.orin.helper.MusicPlayerRemote;
-import com.alium.orin.model.Song;
-import com.alium.orin.soundcloud.HomeSound;
 import com.alium.orin.soundcloud.SoundCloudClient;
 import com.alium.orin.ui.activities.HomeSoundListActivity;
 import com.alium.orin.ui.fragments.AbsMusicServiceFragment;
 import com.alium.orin.util.ACache;
 import com.alium.orin.util.LogUtil;
-import com.alium.orin.util.StatReportUtils;
+import com.alium.orin.util.Util;
+import com.alium.orin.youtube.YouTubeModel;
+import com.alium.orin.youtube.YoutubeClient;
 import com.bumptech.glide.Glide;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.zhy.adapter.recyclerview.MultiItemTypeAdapter;
 import com.zhy.adapter.recyclerview.base.ItemViewDelegate;
 import com.zhy.adapter.recyclerview.base.ViewHolder;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,12 +41,18 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Created by liyanju on 2017/11/24.
+ * Created by liyanju on 2017/12/12.
  */
 
 public class HomeFragment extends AbsMusicServiceFragment {
 
+    private static final String TAG = "HomeFragment";
+
     private Unbinder unbinder;
+
+    private static ArrayList<Object> mDatas = new ArrayList<>();
+
+    private MultiItemTypeAdapter itemTypeAdapter;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
@@ -61,22 +66,6 @@ public class HomeFragment extends AbsMusicServiceFragment {
     @BindView(R.id.loading_mb)
     View loading_mb;
 
-    public static ArrayList<HomeSoundInAdapter> mDatas = new ArrayList<>();
-
-    private MultiItemTypeAdapter itemTypeAdapter;
-
-    public static ArrayList<Song> getHomeSoundContents(String title) {
-        for (HomeSoundInAdapter soundInAdapter : mDatas) {
-            if (soundInAdapter.contentsBean2 != null && title.equals(soundInAdapter.contentsBean2.getName())) {
-                return soundInAdapter.contentsBean2.getContents();
-            } else if (soundInAdapter.contentsBeanX != null && title.equals(soundInAdapter.contentsBeanX.getName())) {
-                return soundInAdapter.contentsBeanX.contents;
-            }
-        }
-        return new ArrayList<>();
-    }
-
-    @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.fragment_main_home_view, null);
@@ -87,40 +76,52 @@ public class HomeFragment extends AbsMusicServiceFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        behaviourOverLapEmulator.setBackgroundColor(ThemeStore.primaryColor(getActivity()));
 
+        behaviourOverLapEmulator.setBackgroundColor(ThemeStore.primaryColor(getActivity()));
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
         itemTypeAdapter = new MultiItemTypeAdapter(getActivity(), mDatas);
         itemTypeAdapter.addItemViewDelegate(new TitleItemDelagate());
-        itemTypeAdapter.addItemViewDelegate(new ListItemDelagate());
-        itemTypeAdapter.addItemViewDelegate(new SingleItemDelagate());
+        itemTypeAdapter.addItemViewDelegate(new GridItemDelagate());
         recyclerView.setAdapter(itemTypeAdapter);
 
         if (mDatas.size() == 0) {
-            showHomeSoundData();
+            requestHomeData();
         }
-
-        AdModule.getInstance().getFacebookAd().loadAd(true, "1305172892959949_1313403128803592");
     }
 
-    private void showHomeSoundData() {
-        new AsyncTask<Void, Void, HomeSound>() {
+    private void requestHomeData() {
+        new AsyncTask<Void, Void, YouTubeModel>(){
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                loading_mb.setVisibility(View.VISIBLE);
+            }
 
             @Override
-            protected HomeSound doInBackground(Void... voids) {
+            protected YouTubeModel doInBackground(Void... voids) {
                 try {
-                    if (App.isLoadLocalHomeSound() && App.sHomeSound != null) {
-                        LogUtil.v("home", "load local homesound ....");
-                        return App.sHomeSound;
+                    if (App.sYoutubeModel != null && App.isLoadLocalHomeYouTube()) {
+                        LogUtil.v(TAG, "loading local youtube data....");
+                        return App.sYoutubeModel;
                     }
 
-                    Object obj = ACache.get(mContext).getAsObject(SoundCloudClient.HOME_SOUND_URL);
-                    if (obj != null) {
-                        LogUtil.v("home", "load ACache homesound ....");
-                        return (HomeSound) obj;
+                    Object cacheObj = ACache.get(mContext).getAsObject(YoutubeClient.HOME_YOUTUBE_URL);
+                    if (cacheObj != null && cacheObj instanceof YouTubeModel) {
+                        LogUtil.v(TAG, "loading cache youtube data....");
+                        return (YouTubeModel)cacheObj;
                     }
+
+                    Response<YouTubeModel> response = YoutubeClient.getYouTubeRetrofit(mContext)
+                            .getYoutubeMusic("en").execute();
+                    YouTubeModel youTubeModel = response.body();
+                    if (youTubeModel != null && youTubeModel.youTubeItems.size() > 0) {
+                        ACache.get(mContext).put(YoutubeClient.HOME_YOUTUBE_URL,
+                                youTubeModel, 60 * 60 * 24 * 5);
+                    }
+                    LogUtil.v(TAG, "loading network youtube data....");
+                    return null;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -128,76 +129,36 @@ public class HomeFragment extends AbsMusicServiceFragment {
             }
 
             @Override
-            protected void onPostExecute(HomeSound homeSound) {
-                super.onPostExecute(homeSound);
-                LogUtil.v("home", "showHomeSoundData onPostExecute homeSound "
-                        + homeSound);
-                if (homeSound == null) {
-                    requestHomeSound();
+            protected void onPostExecute(YouTubeModel youTubeModel) {
+                super.onPostExecute(youTubeModel);
+                if (youTubeModel == null) {
+                    youTubeModel = App.sYoutubeModel;
+                }
+                if (youTubeModel != null) {
+                    showHomeData(youTubeModel);
                 } else {
-                    showHomeSoundView(homeSound);
+                    showEmptyView();
                 }
             }
-        }.execute();
+        }.executeOnExecutor(Util.sExecutorService);
     }
 
-    private void requestHomeSound() {
-        if (loading_mb != null) {
-            loading_mb.setVisibility(View.VISIBLE);
-        }
-        SoundCloudClient.getHomeSoundRetrofit(mContext).getHomeSound(SoundCloudClient.getClientId())
-                .enqueue(new Callback<HomeSound>() {
-                    @Override
-                    public void onResponse(Call<HomeSound> call, final Response<HomeSound> response) {
-                        final HomeSound homeSound = response.body();
-                        LogUtil.v("home", " requestHomeSoundData onResponse " + homeSound);
-                        showHomeSoundView(homeSound);
-                        App.sHomeSound = null;
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ACache.get(mContext).put(SoundCloudClient.HOME_SOUND_URL,
-                                        homeSound, 60 * 60 * 24 * 5);
-                            }
-                        }).start();
-                    }
-
-                    @Override
-                    public void onFailure(Call<HomeSound> call, Throwable throwable) {
-                        throwable.printStackTrace();
-                        LogUtil.e("home", " onFailure " + App.sHomeSound);
-                        if (App.sHomeSound != null) {
-                            showHomeSoundView(App.sHomeSound);
-                        } else {
-                            showEmptyView();
-                        }
-                    }
-                });
-    }
-
-
-    private void showHomeSoundView(HomeSound homeSound) {
+    private void showHomeData(YouTubeModel youTubeModel) {
         if (activity == null || activity.isFinishing()) {
             return;
         }
 
+        loading_mb.setVisibility(View.INVISIBLE);
         empty.setVisibility(View.INVISIBLE);
         recyclerView.setVisibility(View.VISIBLE);
-        if (loading_mb != null) {
-            loading_mb.setVisibility(View.INVISIBLE);
-        }
 
-        try {
-            HomeSoundInAdapter.convertHomeSound(homeSound, mDatas);
-            itemTypeAdapter.notifyDataSetChanged();
-        } catch (Exception e) {
-            e.printStackTrace();
-            mDatas.clear();
-            showEmptyView();
-        }
+        mDatas.clear();
+        mDatas.addAll(youTubeModel.youTubeItems);
+        itemTypeAdapter.notifyDataSetChanged();
     }
 
     private void showEmptyView() {
+        loading_mb.setVisibility(View.INVISIBLE);
         empty.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.INVISIBLE);
     }
@@ -208,93 +169,144 @@ public class HomeFragment extends AbsMusicServiceFragment {
         unbinder.unbind();
     }
 
-    class SingleItemDelagate implements ItemViewDelegate<HomeSoundInAdapter> {
+    public ArrayList<YouTubeModel.YouTubeContent> getContentByName(String name) {
+        for (Object obj : mDatas) {
+            if (obj instanceof HashMap) {
+                ArrayList<YouTubeModel.YouTubeContent> list = (ArrayList<YouTubeModel.YouTubeContent>)
+                        ((HashMap)obj).get(name);
+                if (list != null) {
+                    return list;
+                }
+            }
+        }
+        return null;
+    }
 
+    class GridItemDelagate implements ItemViewDelegate<Object> {
         @Override
         public int getItemViewLayoutId() {
-            return R.layout.home_singleitem_layout;
+            return R.layout.home_grid_item_layout;
         }
 
         @Override
-        public boolean isForViewType(HomeSoundInAdapter item, int position) {
-            return item.type == HomeSoundInAdapter.SINGLE_ITEM_TYPE;
+        public boolean isForViewType(Object item, int position) {
+            return item instanceof HashMap;
+        }
+
+        private YouTubeModel.YouTubeContent getContent(ArrayList<YouTubeModel.YouTubeContent> arrayList, int postion) {
+            if (arrayList.size() > postion) {
+                return arrayList.get(postion);
+            }
+            return null;
+        }
+
+        private void setData(TextView textView, ImageView imageView, View view, int postion,
+                             ArrayList<YouTubeModel.YouTubeContent> list) {
+            YouTubeModel.YouTubeContent content = getContent(list, postion);
+            if (content != null) {
+                view.setVisibility(View.VISIBLE);
+                Glide.with(mContext).load(content.icon).crossFade().centerCrop()
+                        .placeholder(R.drawable.default_album_art)
+                        .error(R.drawable.default_album_art)
+                        .into(imageView);
+                textView.setText(content.name);
+                view.setOnClickListener(new View.OnClickListener(){
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
+            } else {
+                view.setVisibility(View.INVISIBLE);
+            }
+        }
+
+        private void setData2(TextView textView, ImageView imageView, View view, int postion,
+                             ArrayList<YouTubeModel.YouTubeContent> list) {
+            YouTubeModel.YouTubeContent content = getContent(list, postion);
+            if (content != null) {
+                view.setVisibility(View.VISIBLE);
+                Glide.with(mContext).load(content.icon).crossFade().centerCrop()
+                        .placeholder(R.drawable.default_album_art)
+                        .error(R.drawable.default_album_art)
+                        .into(imageView);
+                textView.setText(content.name);
+                view.setOnClickListener(new View.OnClickListener(){
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
+            } else {
+                view.setVisibility(View.GONE);
+            }
         }
 
         @Override
-        public void convert(ViewHolder holder, final HomeSoundInAdapter homeSoundInAdapter, int position) {
-            holder.setText(R.id.single_title_tv, homeSoundInAdapter.contentsBean2.getName());
+        public void convert(ViewHolder holder, Object o, int position) {
+            HashMap<YouTubeModel.Title, ArrayList<YouTubeModel.YouTubeContent>> map = (HashMap<YouTubeModel.Title,
+                    ArrayList<YouTubeModel.YouTubeContent>>)o;
+            YouTubeModel.Title key = map.keySet().iterator().next();
+            ArrayList<YouTubeModel.YouTubeContent> arrayList = map.get(key);
 
-            Glide.with(mContext).load(homeSoundInAdapter.contentsBean2.getContents().get(0).getAlbum_images()).crossFade()
-                    .placeholder(R.drawable.default_album_art).error(R.drawable.default_album_art).centerCrop()
-                    .into((ImageView) holder.getView(R.id.item_album_iv22));
-            holder.setOnClickListener(R.id.home_single_relative, new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    StatReportUtils.trackCustomEvent("home_page", "singleItem click");
-                    HomeSoundListActivity.launch(mContext, homeSoundInAdapter.contentsBean2.getName());
-                }
-            });
-            ((ImageView)holder.getView(R.id.genres_home_item_iv)).setColorFilter(Color.parseColor("#757575"),
-                    PorterDuff.Mode.SRC_IN);
+            View viewRaw1 = holder.getView(R.id.home_grid_raw1);
+            View viewRaw2 = holder.getView(R.id.home_grid_raw2);
+
+            ImageView imageView1 = holder.getView(R.id.song_image1);
+            TextView namgeTV1 = holder.getView(R.id.song_name_tv1);
+            View view1 = holder.getView(R.id.list_item_linear1);
+
+            ImageView imageView2 = holder.getView(R.id.song_image2);
+            TextView namgeTV2 = holder.getView(R.id.song_name_tv2);
+            View view2 = holder.getView(R.id.list_item_linear2);
+
+            ImageView imageView3 = holder.getView(R.id.song_image3);
+            TextView namgeTV3 = holder.getView(R.id.song_name_tv3);
+            View view3 = holder.getView(R.id.list_item_linear3);
+
+            ImageView imageView11 = holder.getView(R.id.song_image11);
+            TextView namgeTV11 = holder.getView(R.id.song_name_tv11);
+            View view11 = holder.getView(R.id.list_item_linear11);
+
+            ImageView imageView22 = holder.getView(R.id.song_image22);
+            TextView namgeTV22 = holder.getView(R.id.song_name_tv22);
+            View view22 = holder.getView(R.id.list_item_linear22);
+
+            ImageView imageView33 = holder.getView(R.id.song_image33);
+            TextView namgeTV33 = holder.getView(R.id.song_name_tv33);
+            View view33 = holder.getView(R.id.list_item_linear33);
+
+            if ("fiveBoxView".equals(key.style) || arrayList.size() < 3) {
+                viewRaw2.setVisibility(View.GONE);
+                setData2(namgeTV1, imageView1, view1, 0, arrayList);
+                setData2(namgeTV2, imageView2, view2, 1, arrayList);
+                setData2(namgeTV3, imageView3, view3, 2, arrayList);
+                return;
+            }
+
+            setData(namgeTV1, imageView1, view1, 0, arrayList);
+
+
+            setData(namgeTV2, imageView2, view2, 1, arrayList);
+
+            setData(namgeTV3, imageView3, view3, 2, arrayList);
+
+            if (arrayList.size() <= 3) {
+                viewRaw2.setVisibility(View.GONE);
+                return;
+            }
+
+            viewRaw2.setVisibility(View.VISIBLE);
+
+            setData(namgeTV11, imageView11, view11, 3, arrayList);
+
+            setData(namgeTV22, imageView22, view22, 4, arrayList);
+
+            setData(namgeTV33, imageView33, view33, 5, arrayList);
         }
     }
 
-    class ListItemDelagate implements ItemViewDelegate<HomeSoundInAdapter> {
-        @Override
-        public int getItemViewLayoutId() {
-            return R.layout.home_list_item_layout;
-        }
-
-        @Override
-        public boolean isForViewType(HomeSoundInAdapter item, int position) {
-            return item.type == HomeSoundInAdapter.LIST_ITEM_TYPE;
-        }
-
-        @Override
-        public void convert(ViewHolder holder, final HomeSoundInAdapter homeSoundInAdapter, int position) {
-            holder.setText(R.id.song_name_tv1, homeSoundInAdapter.list.get(0).title);
-            holder.setText(R.id.song_singer_tv1, homeSoundInAdapter.list.get(0).artistName);
-            Glide.with(mContext).load(homeSoundInAdapter.list.get(0).getAlbum_images()).crossFade().centerCrop()
-                    .placeholder(R.drawable.default_album_art).error(R.drawable.default_album_art)
-                    .into((ImageView) holder.getView(R.id.song_image1));
-            holder.setOnClickListener(R.id.list_item_linear1, new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    MusicPlayerRemote.openQueue(homeSoundInAdapter.list,
-                            homeSoundInAdapter.list.get(0).getPosition(), true);
-                }
-            });
-
-            holder.setText(R.id.song_name_tv2, homeSoundInAdapter.list.get(1).title);
-            holder.setText(R.id.song_singer_tv2, homeSoundInAdapter.list.get(1).artistName);
-            Glide.with(mContext).load(homeSoundInAdapter.list.get(1).getAlbum_images()).crossFade().centerCrop()
-                    .placeholder(R.drawable.default_album_art).error(R.drawable.default_album_art)
-                    .into((ImageView) holder.getView(R.id.song_image2));
-            holder.setOnClickListener(R.id.list_item_linear2, new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    MusicPlayerRemote.openQueue(homeSoundInAdapter.list,
-                            homeSoundInAdapter.list.get(1).getPosition(), true);
-                }
-            });
-
-            holder.setText(R.id.song_name_tv3, homeSoundInAdapter.list.get(2).title);
-            holder.setText(R.id.song_singer_tv3, homeSoundInAdapter.list.get(2).artistName);
-            Glide.with(mContext).load(homeSoundInAdapter.list.get(2).getAlbum_images()).crossFade().centerCrop()
-                    .placeholder(R.drawable.default_album_art).error(R.drawable.default_album_art)
-                    .into((ImageView) holder.getView(R.id.song_image3));
-            holder.setOnClickListener(R.id.list_item_linear3, new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    StatReportUtils.trackCustomEvent("home_page", "listItem click");
-                    MusicPlayerRemote.openQueue(homeSoundInAdapter.list,
-                            homeSoundInAdapter.list.get(2).getPosition(), true);
-                }
-            });
-        }
-    }
-
-    class TitleItemDelagate implements ItemViewDelegate<HomeSoundInAdapter> {
+    class TitleItemDelagate implements ItemViewDelegate<Object> {
 
         @Override
         public int getItemViewLayoutId() {
@@ -302,74 +314,21 @@ public class HomeFragment extends AbsMusicServiceFragment {
         }
 
         @Override
-        public boolean isForViewType(HomeSoundInAdapter item, int position) {
-            return item.type == HomeSoundInAdapter.TITLE_ITEM_TYPE;
+        public boolean isForViewType(Object item, int position) {
+            return item instanceof YouTubeModel.Title;
         }
 
         @Override
-        public void convert(ViewHolder holder, final HomeSoundInAdapter homeSoundInAdapter, int position) {
-            holder.setText(R.id.home_item_title, homeSoundInAdapter.contentsBeanX.getName());
+        public void convert(ViewHolder holder, final Object object, int position) {
+            YouTubeModel.Title title = (YouTubeModel.Title) object;
+            holder.setText(R.id.home_item_title, title.name);
             holder.setOnClickListener(R.id.title_relative, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    HomeSoundListActivity.launch(mContext, homeSoundInAdapter.contentsBeanX.getName());
+
                 }
             });
-            if (homeSoundInAdapter.contentsBeanX.getData_type() == 0) {
-                holder.getView(R.id.home_back_iv).setVisibility(View.INVISIBLE);
-            } else {
-                holder.getView(R.id.home_back_iv).setVisibility(View.VISIBLE);
-            }
         }
     }
 
-    static class HomeSoundInAdapter {
-
-        public static final int TITLE_ITEM_TYPE = 1;
-        public static final int LIST_ITEM_TYPE = 2;
-        public static final int SINGLE_ITEM_TYPE = 3;
-
-        public int type;
-
-        public ArrayList<Song> list = new ArrayList<>();
-
-        public HomeSound.ContentsBean2 contentsBean2;
-
-        public HomeSound.ContentsBeanX contentsBeanX;
-
-
-        public static void convertHomeSound(HomeSound homeSound, ArrayList<HomeSoundInAdapter> homeSoundInAdapters) {
-            List<HomeSound.ContentsBeanX> arrayList = homeSound.getContents();
-
-            for (HomeSound.ContentsBeanX contentsBeanX : arrayList) {
-                HomeSoundInAdapter homeSoundInAdapter = new HomeSoundInAdapter();
-                if (contentsBeanX.getData_type() == 0) {
-                    homeSoundInAdapter.type = TITLE_ITEM_TYPE;
-                    homeSoundInAdapter.contentsBeanX = new HomeSound.ContentsBeanX();
-                    homeSoundInAdapter.contentsBeanX.setName(contentsBeanX.getName());
-                    homeSoundInAdapters.add(homeSoundInAdapter);
-
-                    for (HomeSound.ContentsBean2 contentsBean2 : contentsBeanX.contents2) {
-                        homeSoundInAdapter = new HomeSoundInAdapter();
-                        homeSoundInAdapter.type = SINGLE_ITEM_TYPE;
-                        homeSoundInAdapter.contentsBean2 = contentsBean2;
-                        homeSoundInAdapters.add(homeSoundInAdapter);
-                    }
-
-                } else {
-
-                    homeSoundInAdapter.type = TITLE_ITEM_TYPE;
-                    homeSoundInAdapter.contentsBeanX = contentsBeanX;
-                    homeSoundInAdapters.add(homeSoundInAdapter);
-
-                    homeSoundInAdapter = new HomeSoundInAdapter();
-                    homeSoundInAdapter.type = LIST_ITEM_TYPE;
-                    homeSoundInAdapter.list.add(contentsBeanX.contents.get(0));
-                    homeSoundInAdapter.list.add(contentsBeanX.contents.get(1));
-                    homeSoundInAdapter.list.add(contentsBeanX.contents.get(2));
-                    homeSoundInAdapters.add(homeSoundInAdapter);
-                }
-            }
-        }
-    }
 }

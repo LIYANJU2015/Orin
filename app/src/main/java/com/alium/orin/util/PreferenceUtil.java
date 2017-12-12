@@ -433,7 +433,7 @@ public final class PreferenceUtil {
     }
 
     public long getFristTime() {
-        return mPreferences.getLong("current_time", System.currentTimeMillis());
+        return mPreferences.getLong("current_time", 0);
     }
 
 

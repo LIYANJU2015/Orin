@@ -317,4 +317,6 @@
 
     <string name="loading_lyrics">Loading the lyrics...</string>
 
+    <string name="sound_cloud_text">SoundCloud</string>
+
 </resources>

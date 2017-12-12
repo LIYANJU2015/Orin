@@ -3,6 +3,7 @@ package com.alium.orin;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
+import android.os.Process;
 import android.support.multidex.MultiDexApplication;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -16,6 +17,8 @@ import com.alium.orin.soundcloud.HomeSound;
 import com.alium.orin.soundcloud.HomeSoundDeserializer;
 import com.alium.orin.util.LogUtil;
 import com.alium.orin.util.PreferenceUtil;
+import com.alium.orin.youtube.YouTubeModel;
+import com.alium.orin.youtube.YouTubeModelDeseializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kabouzeid.appthemehelper.ThemeStore;
@@ -44,6 +47,8 @@ public class App extends MultiDexApplication implements AdModule.AdCallBack{
 
     public static HomeSound sHomeSound;
 
+    public static YouTubeModel sYoutubeModel;
+
     public static boolean sIsColdLaunch = false;
 
     @Override
@@ -56,6 +61,8 @@ public class App extends MultiDexApplication implements AdModule.AdCallBack{
         sContext = getApplicationContext();
 
         PreferenceUtil.getInstance(this).setFristTime();
+
+        initLocalHomeYoutube();
 
         initLocalHomeSound();
 
@@ -151,16 +158,51 @@ public class App extends MultiDexApplication implements AdModule.AdCallBack{
     public static boolean isLoadLocalHomeSound() {
         String language = Locale.getDefault().getLanguage().toLowerCase();
         long fristTime = PreferenceUtil.getInstance(App.sContext).getFristTime();
-        if (language.equals("us") || language.equals("en")) {
-            return false;
+        boolean result = true;
+        if ((!language.equals("us") || !language.equals("en")) && fristTime == 0) {
+            result = false;
         }
 
-        if (Math.abs(System.currentTimeMillis() - fristTime) >= 1000 * 60 * 60 * 24 * 5) {
+        if (fristTime != 0 && Math.abs(System.currentTimeMillis() - fristTime) >= 1000 * 60 * 60 * 24 * 5) {
+            result = false;
+        }
+
+        PreferenceUtil.getInstance(App.sContext).setFristTime();
+
+        return result;
+    }
+
+    public static boolean isLoadLocalHomeYouTube() {
+        long fristTime = PreferenceUtil.getInstance(App.sContext).getFristTime();
+        boolean result = true;
+        if (fristTime != 0 && Math.abs(System.currentTimeMillis() - fristTime) >= 1000 * 60 * 60 * 24 * 10) {
             PreferenceUtil.getInstance(App.sContext).setFristTime();
-            return false;
+            result = false;
         }
 
-        return true;
+        return result;
+    }
+
+    private void initLocalHomeYoutube() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                    InputStream is = getAssets().open("ahameet.txt");
+                    int lenght = is.available();
+                    byte[]  buffer = new byte[lenght];
+                    is.read(buffer);
+                    String result = new String(buffer, "utf8");
+                    GsonBuilder gsonBuilder = new GsonBuilder();
+                    gsonBuilder.registerTypeAdapter(YouTubeModel.class, new YouTubeModelDeseializer());
+                    Gson gson = gsonBuilder.create();
+                    sYoutubeModel = gson.fromJson(result, YouTubeModel.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     private void initLocalHomeSound() {
@@ -168,6 +210,7 @@ public class App extends MultiDexApplication implements AdModule.AdCallBack{
             @Override
             public void run() {
                 try {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     InputStream is = getAssets().open("homesound.txt");
                     int lenght = is.available();
                     byte[]  buffer = new byte[lenght];
