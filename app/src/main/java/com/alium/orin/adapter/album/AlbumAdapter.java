@@ -284,6 +284,7 @@ public class AlbumAdapter extends AbsMultiSelectAdapter<AlbumAdapter.ViewHolder,
         SongGlideRequest.Builder.from(Glide.with(activity), album.safeGetFirstSong())
                 .checkIgnoreMediaStore(activity)
                 .generatePalette(activity).build()
+                .placeholder(R.drawable.default_album_art)
                 .into(new PhonographColoredTarget(holder.image) {
                     @Override
                     public void onLoadCleared(Drawable placeholder) {

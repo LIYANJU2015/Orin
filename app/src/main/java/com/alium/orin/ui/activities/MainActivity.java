@@ -116,7 +116,7 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
         }
 
         AdModule.getInstance().getAdMob().initInterstitialAd();
-        AdModule.getInstance().getAdMob().requestRewardedVideoAd(false);
+        AdModule.getInstance().getAdMob().requestNewInterstitial();
     }
 
     private void setMusicChooser(int key) {

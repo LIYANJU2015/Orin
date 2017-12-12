@@ -27,7 +27,8 @@
         android:theme="@style/Theme.Phonograph.Light"
         tools:ignore="UnusedAttribute">
 
-        <activity android:name=".ui.activities.SplashActivity">
+        <activity android:name=".ui.activities.SplashActivity"
+            android:theme="@style/windowIsTranslucen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.MUSIC_PLAYER" />
@@ -101,25 +102,38 @@
                 <data android:mimeType="vnd.android.cursor.dir/audio" />
             </intent-filter>
         </activity>
-        <activity android:name="com.alium.orin.ui.activities.AlbumDetailActivity" />
-        <activity android:name="com.alium.orin.ui.activities.ArtistDetailActivity" />
-        <activity android:name="com.alium.orin.ui.activities.PlaylistDetailActivity" />
-        <activity android:name=".ui.activities.HomeSoundListActivity"/>
+
+        <activity android:name="com.alium.orin.ui.activities.AlbumDetailActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name="com.alium.orin.ui.activities.ArtistDetailActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name="com.alium.orin.ui.activities.PlaylistDetailActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".ui.activities.HomeSoundListActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.alium.orin.ui.activities.tageditor.SongTagEditorActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name="com.alium.orin.ui.activities.tageditor.AlbumTagEditorActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity android:name="com.alium.orin.ui.activities.SearchActivity" />
         <activity
             android:name="com.alium.orin.ui.activities.SettingsActivity"
+            android:screenOrientation="portrait"
             android:label="@string/action_settings" />
         <activity
             android:name="com.alium.orin.ui.activities.AboutActivity"
+            android:screenOrientation="portrait"
             android:label="@string/action_about" />
         <activity
             android:name="com.alium.orin.ui.activities.intro.AppIntroActivity"
+            android:screenOrientation="portrait"
             android:label="@string/intro_label"
             android:theme="@style/Theme.Intro" />
         <activity
@@ -205,6 +219,7 @@
             android:name=".provider.PlayListProvider"/>
 
        <activity android:name=".ui.activities.EqualizerActivity"
+           android:screenOrientation="portrait"
            android:launchMode="singleTask"/>
 
         <receiver

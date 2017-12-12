@@ -114,7 +114,6 @@ public class SplashActivity extends AppCompatActivity implements IFacebookAd.Fac
         countDownTV.setVisibility(View.VISIBLE);
         countDownTimer.cancel();
         countDownTimer.start();
-
     }
 
     private View adView;

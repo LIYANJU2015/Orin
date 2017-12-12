@@ -32,7 +32,7 @@ android {
 
         manifestPlaceholders = [
                 MTA_APPKEY:"A77CEYD9IS8G",
-                MTA_CHANNEL:"Google_Play"
+                MTA_CHANNEL:"google_play"
         ]
 
         multiDexEnabled true
