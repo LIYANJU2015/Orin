@@ -324,4 +324,7 @@
     <string name="copy_link">Copy link</string>
     <string name="default_browser">Open in browser</string>
 
+    <string name="facebook_app_id">1305172892959949</string>
+    <string name="fb_login_protocol_scheme">fb1305172892959949</string>
+
 </resources>

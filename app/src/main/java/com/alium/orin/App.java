@@ -19,6 +19,8 @@ import com.alium.orin.util.LogUtil;
 import com.alium.orin.util.PreferenceUtil;
 import com.alium.orin.youtube.YouTubeModel;
 import com.alium.orin.youtube.YouTubeModelDeseializer;
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kabouzeid.appthemehelper.ThemeStore;
@@ -90,6 +92,9 @@ public class App extends MultiDexApplication implements AdModule.AdCallBack{
         } catch (MtaSDkException e) {
             e.printStackTrace();
         }
+
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        AppEventsLogger.activateApp(this);
     }
 
     @Override

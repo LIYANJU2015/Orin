@@ -1,0 +1,25 @@
+package com.alium.orin.util;
+
+import android.os.Bundle;
+
+import com.alium.orin.App;
+import com.facebook.appevents.AppEventsLogger;
+
+/**
+ * Created by liyanju on 2017/12/13.
+ */
+
+public class FacebookReport {
+
+    public static void logSentReferrer(String referrer)  {
+        AppEventsLogger logger = AppEventsLogger.newLogger(App.sContext);
+        Bundle bundle = new Bundle();
+        bundle.putString("cus_referrer", referrer);
+        logger.logEvent("ReferrerReceiver",bundle);
+    }
+
+    public static void logSentReferrerFacebook(String referrer)  {
+        AppEventsLogger logger = AppEventsLogger.newLogger(App.sContext);
+        logger.logEvent("ReferrerReceiver_facebook");
+    }
+}

@@ -57,16 +57,15 @@ public class SplashActivity extends AppCompatActivity implements IFacebookAd.Fac
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.splash_layout);
-
         LogUtil.v("xx", " sIsColdLaunch " + App.sIsColdLaunch);
         if (!App.sIsColdLaunch) {
             startMain();
             return;
         }
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setContentView(R.layout.splash_layout);
 
         adContainerFrame = (ViewGroup) findViewById(R.id.ad_container_frame);
         countDownTV = (TextView)findViewById(R.id.count_down_tv);

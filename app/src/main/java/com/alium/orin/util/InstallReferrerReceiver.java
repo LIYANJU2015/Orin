@@ -21,5 +21,11 @@ public class InstallReferrerReceiver extends BroadcastReceiver {
         }
         Log.e("Referrer:::::", referrer);
         StatReportUtils.trackCustomEvent("ReferrerReceiver", " referrer : " + referrer);
+        FacebookReport.logSentReferrer(referrer);
+
+        String source = Util.parseRefererSource(referrer);
+        if ("facebook".equals(source)) {
+            FacebookReport.logSentReferrerFacebook(source);
+        }
     }
 }

@@ -29,6 +29,7 @@ import com.alium.orin.model.Album;
 import com.kabouzeid.appthemehelper.util.TintHelper;
 import com.alium.orin.R;
 
+import java.net.URLDecoder;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,6 +43,21 @@ public class Util {
 
     public static void runSingleThread(Runnable runnable) {
         sExecutorService.execute(runnable);
+    }
+
+    public static String parseRefererSource(String referer) {
+        try {
+            String newreferer = URLDecoder.decode(referer, "UTF-8");
+            String target = "utm_source=";
+            newreferer = newreferer.substring(newreferer.indexOf(target) + target.length(), newreferer.length());
+            System.out.println("newreferer::" + newreferer);
+            String source = newreferer.substring(0, newreferer.indexOf("&"));
+            System.out.println("source::>>" + source);
+            return source;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     public static int getActionBarSize(@NonNull Context context) {
