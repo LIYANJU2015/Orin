@@ -293,7 +293,7 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
                     adapter.notifyDataSetChanged();
                 }
             }
-        }.execute();
+        }.executeOnExecutor(Util.sExecutorService);
     }
 
     @Override

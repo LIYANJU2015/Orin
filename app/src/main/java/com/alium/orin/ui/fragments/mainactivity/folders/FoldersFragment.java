@@ -641,6 +641,7 @@ public class FoldersFragment extends AbsMainActivityFragment implements MainActi
             checkCallbackReference();
         }
 
+
         @Override
         protected String[] doInBackground(LoadingInfo... params) {
             try {

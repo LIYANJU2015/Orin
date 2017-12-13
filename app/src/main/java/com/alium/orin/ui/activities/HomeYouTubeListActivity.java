@@ -113,6 +113,7 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         AdModule.getInstance().getFacebookAd().loadAd(true, "1305172892959949_1313403128803592");
+        AdModule.getInstance().getAdMob().showInterstitialAd();
     }
 
     private AdViewWrapperAdapter adViewWrapperAdapter;
@@ -139,7 +140,6 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
                     public void onClick(View v) {
                         YouTubePlayerActivity.launch(HomeYouTubeListActivity.this,
                                 content.extra, content.name);
-                        AdModule.getInstance().getAdMob().showInterstitialAd();
                     }
                 });
             }
