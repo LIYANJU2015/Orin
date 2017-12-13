@@ -4,6 +4,8 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,7 +22,7 @@ import com.alium.orin.helper.MusicPlayerRemote;
 import com.alium.orin.model.Song;
 import com.alium.orin.soundcloud.HomeSound;
 import com.alium.orin.soundcloud.SoundCloudClient;
-import com.alium.orin.ui.activities.HomeSoundListActivity;
+import com.alium.orin.ui.activities.SoundCloudListActivity;
 import com.alium.orin.ui.fragments.AbsMusicServiceFragment;
 import com.alium.orin.util.ACache;
 import com.alium.orin.util.LogUtil;
@@ -85,6 +87,8 @@ public class SoundCloudFragment extends AbsMusicServiceFragment {
         return view;
     }
 
+    private Handler mMainHandler = new Handler(Looper.getMainLooper());
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -99,9 +103,19 @@ public class SoundCloudFragment extends AbsMusicServiceFragment {
         itemTypeAdapter.addItemViewDelegate(new SingleItemDelagate());
         recyclerView.setAdapter(itemTypeAdapter);
 
-        if (mDatas.size() == 0) {
-            showHomeSoundData();
-        }
+        recyclerView.post(new Runnable() {
+            @Override
+            public void run() {
+                mMainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mDatas.size() == 0) {
+                            showHomeSoundData();
+                        }
+                    }
+                });
+            }
+        });
 
         AdModule.getInstance().getFacebookAd().loadAd(true, "1305172892959949_1313403128803592");
     }
@@ -245,7 +259,7 @@ public class SoundCloudFragment extends AbsMusicServiceFragment {
                 @Override
                 public void onClick(View v) {
                     StatReportUtils.trackCustomEvent("home_page", "singleItem click");
-                    HomeSoundListActivity.launch(mContext, homeSoundInAdapter.contentsBean2.getName());
+                    SoundCloudListActivity.launch(activity, homeSoundInAdapter.contentsBean2.getName());
                 }
             });
             ((ImageView)holder.getView(R.id.genres_home_item_iv)).setColorFilter(Color.parseColor("#757575"),
@@ -326,7 +340,8 @@ public class SoundCloudFragment extends AbsMusicServiceFragment {
             holder.setOnClickListener(R.id.title_relative, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    HomeSoundListActivity.launch(mContext, homeSoundInAdapter.contentsBeanX.getName());
+                    SoundCloudListActivity.launch(activity
+                            , homeSoundInAdapter.contentsBeanX.getName());
                 }
             });
             if (homeSoundInAdapter.contentsBeanX.getData_type() == 0) {

@@ -11,6 +11,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -54,9 +56,10 @@ public class SplashActivity extends AppCompatActivity implements IFacebookAd.Fac
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        StatusBarCompat.setStatusBarColor(this,
-                ContextCompat.getColor(this, R.color.colorPrimaryDark));
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.splash_layout);
 
         LogUtil.v("xx", " sIsColdLaunch " + App.sIsColdLaunch);

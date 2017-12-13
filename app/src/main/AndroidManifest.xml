@@ -28,7 +28,9 @@
         tools:ignore="UnusedAttribute">
 
         <activity android:name=".ui.activities.SplashActivity"
-            android:theme="@style/windowIsTranslucen">
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.MUSIC_PLAYER" />
@@ -112,7 +114,8 @@
         <activity android:name="com.alium.orin.ui.activities.PlaylistDetailActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activities.HomeSoundListActivity"
+        <activity android:name=".ui.activities.SoundCloudListActivity"
+            android:theme="@style/windowIsTranslucen"
             android:screenOrientation="portrait"/>
         <activity
             android:name="com.alium.orin.ui.activities.tageditor.SongTagEditorActivity"
@@ -220,6 +223,7 @@
 
        <activity android:name=".ui.activities.EqualizerActivity"
            android:screenOrientation="portrait"
+           android:theme="@style/windowIsTranslucen"
            android:launchMode="singleTask"/>
 
         <receiver
@@ -229,6 +233,20 @@
                 <action android:name="com.android.vending.INSTALL_REFERRER" />
             </intent-filter>
         </receiver>
+
+        <activity android:name=".ui.activities.YouTubePlayerActivity"
+            android:hardwareAccelerated="true"
+            android:configChanges="orientation|screenSize"
+            android:launchMode="singleTop"
+            android:theme="@style/windowIsTranslucen"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".ui.activities.HomeYouTubeListActivity"
+            android:configChanges="orientation|screenSize"
+            android:launchMode="singleTop"
+            android:theme="@style/windowIsTranslucen"
+            android:screenOrientation="portrait"
+            />
 
         <provider
             android:name="com.tencent.mid.api.MidProvider"

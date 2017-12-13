@@ -29,8 +29,26 @@ public class YouTubeModel implements Serializable {
             this.name = name;
         }
 
+        @Override
+        public int hashCode() {
+            return name.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+
+            if (obj instanceof Title && ((Title) obj).name.equals(name)) {
+                return true;
+            }
+
+            return false;
+        }
+
         public String style;
 
-        public String name;
+        public String name = "";
     }
 }

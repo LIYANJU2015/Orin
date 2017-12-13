@@ -2,6 +2,8 @@ package com.alium.orin.ui.fragments.mainactivity.library.pager;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,8 +16,8 @@ import android.widget.TextView;
 
 import com.alium.orin.App;
 import com.alium.orin.R;
-import com.alium.orin.soundcloud.SoundCloudClient;
-import com.alium.orin.ui.activities.HomeSoundListActivity;
+import com.alium.orin.ui.activities.HomeYouTubeListActivity;
+import com.alium.orin.ui.activities.YouTubePlayerActivity;
 import com.alium.orin.ui.fragments.AbsMusicServiceFragment;
 import com.alium.orin.util.ACache;
 import com.alium.orin.util.LogUtil;
@@ -28,16 +30,12 @@ import com.zhy.adapter.recyclerview.MultiItemTypeAdapter;
 import com.zhy.adapter.recyclerview.base.ItemViewDelegate;
 import com.zhy.adapter.recyclerview.base.ViewHolder;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
@@ -73,6 +71,8 @@ public class HomeFragment extends AbsMusicServiceFragment {
         return view;
     }
 
+    private Handler mMainHandler = new Handler(Looper.getMainLooper());
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -86,9 +86,19 @@ public class HomeFragment extends AbsMusicServiceFragment {
         itemTypeAdapter.addItemViewDelegate(new GridItemDelagate());
         recyclerView.setAdapter(itemTypeAdapter);
 
-        if (mDatas.size() == 0) {
-            requestHomeData();
-        }
+        recyclerView.post(new Runnable() {
+            @Override
+            public void run() {
+                mMainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mDatas.size() == 0) {
+                            requestHomeData();
+                        }
+                    }
+                });
+            }
+        });
     }
 
     private void requestHomeData() {
@@ -169,11 +179,11 @@ public class HomeFragment extends AbsMusicServiceFragment {
         unbinder.unbind();
     }
 
-    public ArrayList<YouTubeModel.YouTubeContent> getContentByName(String name) {
+    public ArrayList<YouTubeModel.YouTubeContent> getContentByName(YouTubeModel.Title title) {
         for (Object obj : mDatas) {
             if (obj instanceof HashMap) {
                 ArrayList<YouTubeModel.YouTubeContent> list = (ArrayList<YouTubeModel.YouTubeContent>)
-                        ((HashMap)obj).get(name);
+                        ((HashMap)obj).get(title);
                 if (list != null) {
                     return list;
                 }
@@ -202,7 +212,7 @@ public class HomeFragment extends AbsMusicServiceFragment {
 
         private void setData(TextView textView, ImageView imageView, View view, int postion,
                              ArrayList<YouTubeModel.YouTubeContent> list) {
-            YouTubeModel.YouTubeContent content = getContent(list, postion);
+            final YouTubeModel.YouTubeContent content = getContent(list, postion);
             if (content != null) {
                 view.setVisibility(View.VISIBLE);
                 Glide.with(mContext).load(content.icon).crossFade().centerCrop()
@@ -213,7 +223,7 @@ public class HomeFragment extends AbsMusicServiceFragment {
                 view.setOnClickListener(new View.OnClickListener(){
                     @Override
                     public void onClick(View v) {
-
+                        YouTubePlayerActivity.launch(activity, content.extra, content.name);
                     }
                 });
             } else {
@@ -223,7 +233,7 @@ public class HomeFragment extends AbsMusicServiceFragment {
 
         private void setData2(TextView textView, ImageView imageView, View view, int postion,
                              ArrayList<YouTubeModel.YouTubeContent> list) {
-            YouTubeModel.YouTubeContent content = getContent(list, postion);
+            final YouTubeModel.YouTubeContent content = getContent(list, postion);
             if (content != null) {
                 view.setVisibility(View.VISIBLE);
                 Glide.with(mContext).load(content.icon).crossFade().centerCrop()
@@ -234,7 +244,7 @@ public class HomeFragment extends AbsMusicServiceFragment {
                 view.setOnClickListener(new View.OnClickListener(){
                     @Override
                     public void onClick(View v) {
-
+                        YouTubePlayerActivity.launch(activity, content.extra, content.name);
                     }
                 });
             } else {
@@ -320,12 +330,12 @@ public class HomeFragment extends AbsMusicServiceFragment {
 
         @Override
         public void convert(ViewHolder holder, final Object object, int position) {
-            YouTubeModel.Title title = (YouTubeModel.Title) object;
+            final YouTubeModel.Title title = (YouTubeModel.Title) object;
             holder.setText(R.id.home_item_title, title.name);
             holder.setOnClickListener(R.id.title_relative, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    HomeYouTubeListActivity.launch(activity, title.name, getContentByName(title));
                 }
             });
         }

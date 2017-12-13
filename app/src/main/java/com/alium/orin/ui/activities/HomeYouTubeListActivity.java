@@ -1,8 +1,9 @@
 package com.alium.orin.ui.activities;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -17,12 +18,8 @@ import android.widget.TextView;
 import com.admodule.AdModule;
 import com.alium.orin.R;
 import com.alium.orin.adapter.AdViewWrapperAdapter;
-import com.alium.orin.helper.MusicPlayerRemote;
-import com.alium.orin.helper.menu.SongMenuHelper;
-import com.alium.orin.model.Song;
-import com.alium.orin.ui.activities.base.AbsSlidingMusicPanelActivity;
-import com.alium.orin.ui.fragments.mainactivity.library.pager.SoundCloudFragment;
-import com.alium.orin.util.StatReportUtils;
+import com.alium.orin.ui.activities.base.AbsBaseActivity;
+import com.alium.orin.youtube.YouTubeModel;
 import com.bumptech.glide.Glide;
 import com.facebook.ads.AdChoicesView;
 import com.facebook.ads.NativeAd;
@@ -38,10 +35,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by liyanju on 2017/11/26.
+ * Created by liyanju on 2017/12/13.
  */
 
-public class HomeSoundListActivity extends AbsSlidingMusicPanelActivity {
+public class HomeYouTubeListActivity extends AbsBaseActivity {
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
@@ -52,39 +49,56 @@ public class HomeSoundListActivity extends AbsSlidingMusicPanelActivity {
 
     private String mTitle;
 
-    private ArrayList<Song> mData;
+    private ArrayList<YouTubeModel.YouTubeContent> mData = new ArrayList<>();
 
-    private CommonAdapter commonadapter;
-
-    @Override
-    protected View createContentView() {
-        return wrapSlidingMusicPanel(R.layout.home_sound_list_layout);
+    public static void launch(Activity activity, String title, ArrayList<YouTubeModel.YouTubeContent> list) {
+        Intent intent = new Intent(activity, HomeYouTubeListActivity.class);
+        intent.putExtra("list", list);
+        intent.putExtra("title", title);
+        activity.startActivity(intent);
+        activity.overridePendingTransition(R.anim.slide_bottom_in, 0);
     }
 
-    public static void launch(Context context, String title) {
-        Intent intent = new Intent(context, HomeSoundListActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra("title", title);
-        context.startActivity(intent);
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(0, R.anim.slide_bottom_out);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.home_youtube_list_layout);
         setDrawUnderStatusbar(true);
         ButterKnife.bind(this);
+        if (savedInstanceState != null) {
+            mTitle = savedInstanceState.getString("title");
+            ArrayList<YouTubeModel.YouTubeContent> data = (ArrayList<YouTubeModel.YouTubeContent>)savedInstanceState
+                    .getSerializable("list");
+            if (data != null) {
+                mData.clear();
+                mData.addAll(data);
+            }
+        } else {
+            mTitle = getIntent().getStringExtra("title");
+            ArrayList<YouTubeModel.YouTubeContent> data = (ArrayList<YouTubeModel.YouTubeContent>) getIntent()
+                    .getSerializableExtra("list");
+            mData.clear();
+            mData.addAll(data);
+        }
 
-        mTitle = getIntent().getStringExtra("title");
-
-        setStatusbarColorAuto();
-        setNavigationbarColorAuto();
-        setTaskDescriptionColorAuto();
-
-        mData = SoundCloudFragment.getHomeSoundContents(mTitle);
-
-        setUpRecyclerView();
+        setStatusbarColor(ThemeStore.primaryColor(this));
 
         setUpToolBar();
+
+        setUpRecyclerView();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        outState.putString("title", mTitle);
+        outState.putSerializable("list", mData);
     }
 
     private void setUpToolBar() {
@@ -96,66 +110,36 @@ public class HomeSoundListActivity extends AbsSlidingMusicPanelActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         AdModule.getInstance().getFacebookAd().loadAd(true, "1305172892959949_1313403128803592");
     }
 
     private AdViewWrapperAdapter adViewWrapperAdapter;
+    private CommonAdapter commonadapter;
 
     private void setUpRecyclerView() {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         final GeneralItemAnimator animator = new RefactoredDefaultItemAnimator();
 
-        commonadapter = new CommonAdapter<Song>(this,
-                R.layout.item_list, mData) {
+        commonadapter = new CommonAdapter<YouTubeModel.YouTubeContent>(this,
+                R.layout.home_youtube_list_item_layout, mData) {
             @Override
-            protected void convert(final ViewHolder holder, final Song song,
+            protected void convert(final ViewHolder holder, final YouTubeModel.YouTubeContent content,
                                    int position) {
-                Glide.with(HomeSoundListActivity.this).load(song.getAlbum_images())
+                Glide.with(HomeYouTubeListActivity.this).load(content.icon)
                         .crossFade().placeholder(R.drawable.default_album_art)
                         .into((ImageView) holder.getView(R.id.image));
 
                 TextView titleTV = holder.getView(R.id.title);
-                titleTV.setText(song.title);
-
-                TextView textTV = holder.getView(R.id.text);
-                textTV.setText(song.artistName);
+                titleTV.setText(content.name);
 
                 holder.setOnClickListener(R.id.list_item_frame, new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        int position = holder.getAdapterPosition();
-                        if (adViewWrapperAdapter != null) {
-                            position = adViewWrapperAdapter.getAdViewCountBeforeByPostion(holder.getAdapterPosition());
-                            position = holder.getAdapterPosition() - position;
-                        }
+                        YouTubePlayerActivity.launch(HomeYouTubeListActivity.this,
+                                content.extra, content.name);
                         AdModule.getInstance().getAdMob().showInterstitialAd();
-                        MusicPlayerRemote.openQueue(mData, position, true);
-
-                        StatReportUtils.trackCustomEvent("home_list_page", "item click");
-                    }
-                });
-                final ImageView overflowButton = holder.getView(R.id.menu);
-                overflowButton.setOnClickListener(new SongMenuHelper.OnClickSongMenu(HomeSoundListActivity.this) {
-
-                    @Override
-                    public int getMenuRes() {
-                        return R.menu.menu_item_online_song;
-                    }
-
-                    @Override
-                    public Song getSong() {
-                        return song;
                     }
                 });
             }
@@ -168,7 +152,6 @@ public class HomeSoundListActivity extends AbsSlidingMusicPanelActivity {
             adViewWrapperAdapter.addAdView(22, new AdViewWrapperAdapter.
                     AdViewItem(setUpNativeAdView(nativeAd), 1));
             adapter = adViewWrapperAdapter;
-            StatReportUtils.trackCustomEvent("home_list_page", "ad show");
         } else {
             adapter = commonadapter;
         }
@@ -176,10 +159,19 @@ public class HomeSoundListActivity extends AbsSlidingMusicPanelActivity {
         recyclerView.setItemAnimator(animator);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private View setUpNativeAdView(NativeAd nativeAd) {
         nativeAd.unregisterView();
 
-        View adView = LayoutInflater.from(this).inflate(R.layout.home_list_ad_item, null);
+        View adView = LayoutInflater.from(this).inflate(R.layout.home_list_ad_item2, null);
 
         FrameLayout adChoicesFrame = (FrameLayout)adView.findViewById(R.id.fb_adChoices2);
         ImageView nativeAdIcon = (ImageView) adView.findViewById(R.id.image_ad);
