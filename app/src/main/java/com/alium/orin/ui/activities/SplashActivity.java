@@ -140,5 +140,6 @@ public class SplashActivity extends AppCompatActivity implements IFacebookAd.Fac
         App.sIsColdLaunch = false;
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+        overridePendingTransition(0, 0);
     }
 }

@@ -56,7 +56,7 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
         return mIsInitialized;
     }
 
-    private volatile boolean isPrepared = false;
+    private volatile boolean isPrepared = true;
 
     /**
      * @param player The {@link MediaPlayer} to use
