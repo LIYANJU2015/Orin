@@ -100,6 +100,7 @@ public class SplashActivity extends AppCompatActivity implements IFacebookAd.Fac
                     }
                 }).setInterpolator(new AccelerateInterpolator())
                 .start();
+
     }
 
     @Override

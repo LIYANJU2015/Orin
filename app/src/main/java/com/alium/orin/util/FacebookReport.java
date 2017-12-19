@@ -18,6 +18,13 @@ public class FacebookReport {
         logger.logEvent("ReferrerReceiver",bundle);
     }
 
+    public static void logSentReferrer2(String referrer)  {
+        AppEventsLogger logger = AppEventsLogger.newLogger(App.sContext);
+        Bundle bundle = new Bundle();
+        bundle.putString("utm_campaign", referrer);
+        logger.logEvent("ReferrerReceiver2",bundle);
+    }
+
     public static void logSentReferrerFacebook(String referrer)  {
         AppEventsLogger logger = AppEventsLogger.newLogger(App.sContext);
         logger.logEvent("ReferrerReceiver_facebook");

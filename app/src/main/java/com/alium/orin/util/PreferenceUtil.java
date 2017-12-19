@@ -437,4 +437,28 @@ public final class PreferenceUtil {
     }
 
 
+
+    public void setReportDeepLinkCount(int count) {
+        final SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putInt("DeepLinkCount", count);
+        editor.apply();
+    }
+
+    public int getReportDeepLinkCount() {
+        return mPreferences.getInt("DeepLinkCount", 0);
+    }
+
+
+    public void saveAdProtactTime() {
+        final SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putLong("AdProtactTime", System.currentTimeMillis());
+        editor.apply();
+    }
+
+    public long getAdProtactTime() {
+        return mPreferences.getLong("AdProtactTime", 0);
+    }
+
+
+
 }

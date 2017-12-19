@@ -19,6 +19,7 @@ import com.admodule.AdModule;
 import com.alium.orin.R;
 import com.alium.orin.adapter.AdViewWrapperAdapter;
 import com.alium.orin.ui.activities.base.AbsBaseActivity;
+import com.alium.orin.util.PreferenceUtil;
 import com.alium.orin.youtube.YouTubeModel;
 import com.bumptech.glide.Glide;
 import com.facebook.ads.AdChoicesView;
@@ -112,8 +113,10 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        AdModule.getInstance().getFacebookAd().loadAd(true, "1305172892959949_1313403128803592");
-        AdModule.getInstance().getAdMob().showInterstitialAd();
+        if ((System.currentTimeMillis() - PreferenceUtil.getInstance(this).getAdProtactTime()) >= 1000*60*10) {
+            AdModule.getInstance().getFacebookAd().loadAd(true, "1305172892959949_1313403128803592");
+            AdModule.getInstance().getAdMob().showInterstitialAd();
+        }
     }
 
     private AdViewWrapperAdapter adViewWrapperAdapter;
@@ -147,7 +150,10 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
 
         RecyclerView.Adapter adapter;
         NativeAd nativeAd = AdModule.getInstance().getFacebookAd().getNativeAd();
-        if (nativeAd != null && nativeAd.isAdLoaded()) {
+
+        boolean isCan = (System.currentTimeMillis() -
+                PreferenceUtil.getInstance(this).getAdProtactTime()) >= 1000*60*10;
+        if (isCan && nativeAd != null && nativeAd.isAdLoaded()) {
             adViewWrapperAdapter = new AdViewWrapperAdapter(commonadapter);
             adViewWrapperAdapter.addAdView(22, new AdViewWrapperAdapter.
                     AdViewItem(setUpNativeAdView(nativeAd), 1));

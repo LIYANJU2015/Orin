@@ -27,8 +27,8 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         applicationId 'com.gomusic.musicplus'
-        versionCode 2
-        versionName '1.1.0'
+        versionCode 3
+        versionName '1.1.1'
 
         manifestPlaceholders = [
                 MTA_APPKEY:"A77CEYD9IS8G",
@@ -108,7 +108,7 @@ dependencies {
     compile 'com.qq.mta:mta:3.2.1-release'
     compile 'com.tencent.bugly:crashreport:latest.release'
     compile 'com.google.android.gms:play-services-ads:11.6.2'
-    compile 'com.facebook.android:audience-network-sdk:4.+'
+    compile 'com.facebook.android:audience-network-sdk:4.27.0'
     compile(name: 'admodule-release', ext: 'aar')
     compile 'com.vincan:medialoader:1.0.0'
     compile 'com.github.markomilos:paginate:0.5.1'

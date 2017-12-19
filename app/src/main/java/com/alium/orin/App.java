@@ -21,6 +21,7 @@ import com.alium.orin.youtube.YouTubeModel;
 import com.alium.orin.youtube.YouTubeModelDeseializer;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.applinks.AppLinkData;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kabouzeid.appthemehelper.ThemeStore;
@@ -36,6 +37,8 @@ import org.eclipse.egit.github.core.client.GsonUtils;
 
 import java.io.InputStream;
 import java.util.Locale;
+
+import ren.yale.android.cachewebviewlib.utils.NetworkUtils;
 
 
 /**
@@ -95,7 +98,24 @@ public class App extends MultiDexApplication implements AdModule.AdCallBack{
 
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
+
+        fetchCount = PreferenceUtil.getInstance(sContext).getReportDeepLinkCount();
+        if (fetchCount < 3 && NetworkUtils.isConnected(sContext)) {
+            AppLinkData.fetchDeferredAppLinkData(sContext, getString(R.string.facebook_app_id),
+                    new AppLinkData.CompletionHandler() {
+                        @Override
+                        public void onDeferredAppLinkDataFetched(AppLinkData appLinkData) {
+                            PreferenceUtil.getInstance(sContext).setReportDeepLinkCount(fetchCount + 1);
+                        }
+                    });
+        }
+
+        if (PreferenceUtil.getInstance(this).getAdProtactTime() == 0) {
+            PreferenceUtil.getInstance(this).saveAdProtactTime();
+        }
     }
+
+    private int fetchCount;
 
     @Override
     public Application getApplication() {

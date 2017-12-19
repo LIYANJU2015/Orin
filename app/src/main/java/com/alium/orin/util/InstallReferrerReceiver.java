@@ -13,19 +13,36 @@ import com.tencent.stat.StatService;
 
 public class InstallReferrerReceiver extends BroadcastReceiver {
 
+    private static final String TARGET = "&referrer=";
+
     @Override
     public void onReceive(Context context, Intent intent) {
-        String referrer = intent.getStringExtra("referrer");
-        if (referrer == null) {
-            return;
-        }
-        Log.e("Referrer:::::", referrer);
-        StatReportUtils.trackCustomEvent("ReferrerReceiver", " referrer : " + referrer);
-        FacebookReport.logSentReferrer(referrer);
+        try {
+            String referrer = intent.getStringExtra("referrer");
+            if (referrer == null) {
+                return;
+            }
+            Log.e("Referrer:::::", referrer);
+            StatReportUtils.trackCustomEvent("ReferrerReceiver", " referrer : " + referrer);
 
-        String source = Util.parseRefererSource(referrer);
-        if ("facebook".equals(source)) {
-            FacebookReport.logSentReferrerFacebook(source);
+            if (referrer.contains(TARGET)) {
+                String referrer2 = referrer.substring(referrer.indexOf(TARGET) + TARGET.length(), referrer.length());
+                FacebookReport.logSentReferrer(referrer2);
+            } else {
+                FacebookReport.logSentReferrer(referrer);
+            }
+
+            if (referrer.contains("utm_campaign=")) {
+                String referrer2 = referrer.substring(referrer.indexOf("utm_campaign="), referrer.length());
+                FacebookReport.logSentReferrer2(referrer2);
+            }
+
+            String source = Util.parseRefererSource(referrer);
+            if ("facebook".equals(source)) {
+                FacebookReport.logSentReferrerFacebook(source);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
