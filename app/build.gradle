@@ -27,8 +27,8 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         applicationId 'com.gomusic.musicplus'
-        versionCode 3
-        versionName '1.1.1'
+        versionCode 4
+        versionName '1.1.2'
 
         manifestPlaceholders = [
                 MTA_APPKEY:"A77CEYD9IS8G",

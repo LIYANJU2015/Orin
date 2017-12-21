@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.PersistableBundle;
 import android.support.annotation.RequiresApi;
@@ -17,6 +18,7 @@ import android.support.v7.widget.PopupMenu;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
@@ -32,11 +34,14 @@ import android.widget.Toast;
 
 import com.alium.orin.R;
 import com.alium.orin.ui.activities.base.AbsBaseActivity;
+import com.alium.orin.util.LogUtil;
 import com.alium.orin.views.CustomSwipeToRefresh;
 import com.githang.statusbar.StatusBarCompat;
 import com.kabouzeid.appthemehelper.ThemeStore;
 
 import java.io.File;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import ren.yale.android.cachewebviewlib.CacheWebView;
 import ren.yale.android.cachewebviewlib.utils.NetworkUtils;
@@ -194,6 +199,34 @@ public class YouTubePlayerActivity extends AbsBaseActivity {
         swipeRefreshLayout.setRefreshing(true);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            if (isOnPause) {
+                if (mWebView != null) {
+                    mWebView.getClass().getMethod("onResume").invoke(mWebView, (Object[]) null);
+                }
+                isOnPause = false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try {
+            if (mWebView != null) {
+                mWebView.getClass().getMethod("onPause").invoke(mWebView, (Object[]) null);
+                isOnPause = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void pageNavigator(int tag) {
         mBackImageView.setVisibility(tag);
         mLineView.setVisibility(tag);
@@ -242,6 +275,7 @@ public class YouTubePlayerActivity extends AbsBaseActivity {
         webSettings.setDomStorageEnabled(true);
         webSettings.setAllowFileAccess(true);
         webSettings.setUseWideViewPort(true);
+        webSettings.setPluginState(WebSettings.PluginState.ON);
 
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
@@ -275,14 +309,29 @@ public class YouTubePlayerActivity extends AbsBaseActivity {
         setCachePath();
     }
 
+    private boolean isOnPause;
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         try {
-            clearWebView(mWebView);
+            if (mWebView != null) {
+                mWebView.getSettings().setBuiltInZoomControls(true);
+                mWebView.setVisibility(View.GONE);
+                long delayTime = ViewConfiguration.getZoomControlsTimeout();
+                LogUtil.v("youtube", "onDestroy delayTime: " + delayTime);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mWebView.destroy();
+                        mWebView = null;
+                    }
+                }, delayTime);
+            }
         } catch (Throwable e) {
             e.printStackTrace();
         }
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     public static final void clearWebView(WebView m) {

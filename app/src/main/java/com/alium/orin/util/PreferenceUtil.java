@@ -459,6 +459,4 @@ public final class PreferenceUtil {
         return mPreferences.getLong("AdProtactTime", 0);
     }
 
-
-
 }
