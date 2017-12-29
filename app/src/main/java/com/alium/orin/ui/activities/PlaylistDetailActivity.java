@@ -87,7 +87,9 @@ public class PlaylistDetailActivity extends AbsSlidingMusicPanelActivity impleme
         setNavigationbarColorAuto();
         setTaskDescriptionColorAuto();
 
-        playlist = getIntent().getExtras().getParcelable(EXTRA_PLAYLIST);
+        if (getIntent() != null && getIntent().getExtras() != null) {
+            playlist = getIntent().getExtras().getParcelable(EXTRA_PLAYLIST);
+        }
 
         setUpRecyclerView();
 

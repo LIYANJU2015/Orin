@@ -15,6 +15,7 @@ import com.alium.orin.appshortcuts.DynamicShortcutManager;
 import com.alium.orin.soundcloud.ContentsBean2Deserializer;
 import com.alium.orin.soundcloud.HomeSound;
 import com.alium.orin.soundcloud.HomeSoundDeserializer;
+import com.alium.orin.util.FacebookReport;
 import com.alium.orin.util.LogUtil;
 import com.alium.orin.util.PreferenceUtil;
 import com.alium.orin.youtube.YouTubeModel;
@@ -101,11 +102,18 @@ public class App extends MultiDexApplication implements AdModule.AdCallBack{
 
         fetchCount = PreferenceUtil.getInstance(sContext).getReportDeepLinkCount();
         if (fetchCount < 3 && NetworkUtils.isConnected(sContext)) {
+            LogUtil.v("xx", " start onDeferredAppLinkDataFetched>>>>");
             AppLinkData.fetchDeferredAppLinkData(sContext, getString(R.string.facebook_app_id),
                     new AppLinkData.CompletionHandler() {
                         @Override
                         public void onDeferredAppLinkDataFetched(AppLinkData appLinkData) {
                             PreferenceUtil.getInstance(sContext).setReportDeepLinkCount(fetchCount + 1);
+                            LogUtil.v("xx", " onDeferredAppLinkDataFetched>>>>");
+                            if (appLinkData != null && appLinkData.getTargetUri() != null) {
+                                LogUtil.v("xx", " onDeferredAppLinkDataFetched111>>>>");
+                                String deepLinkStr = appLinkData.getTargetUri().toString();
+                                FacebookReport.logAppLinkDataFetched(deepLinkStr);
+                            }
                         }
                     });
         }

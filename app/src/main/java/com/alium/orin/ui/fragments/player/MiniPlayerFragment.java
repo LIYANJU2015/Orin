@@ -162,7 +162,9 @@ public class MiniPlayerFragment extends AbsMusicServiceFragment implements Music
         loadingPB.getHandler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                loadingPB.setVisibility(View.INVISIBLE);
+                if (loadingPB != null) {
+                    loadingPB.setVisibility(View.INVISIBLE);
+                }
             }
         }, 500);
         if (miniPlayerPlayPauseButton.getVisibility() == View.INVISIBLE) {

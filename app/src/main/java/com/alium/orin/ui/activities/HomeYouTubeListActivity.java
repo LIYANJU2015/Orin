@@ -113,7 +113,7 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if ((System.currentTimeMillis() - PreferenceUtil.getInstance(this).getAdProtactTime()) >= 1000*60*25) {
+        if ((System.currentTimeMillis() - PreferenceUtil.getInstance(this).getAdProtactTime()) >= 1000*60*10) {
             AdModule.getInstance().getFacebookAd().loadAd(true, "1305172892959949_1313403128803592");
             AdModule.getInstance().getAdMob().showInterstitialAd();
         }
@@ -152,7 +152,7 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
         NativeAd nativeAd = AdModule.getInstance().getFacebookAd().getNativeAd();
 
         boolean isCan = (System.currentTimeMillis() -
-                PreferenceUtil.getInstance(this).getAdProtactTime()) >= 1000*60*15;
+                PreferenceUtil.getInstance(this).getAdProtactTime()) >= 1000*60*10;
         if (isCan && nativeAd != null && nativeAd.isAdLoaded()) {
             adViewWrapperAdapter = new AdViewWrapperAdapter(commonadapter);
             adViewWrapperAdapter.addAdView(22, new AdViewWrapperAdapter.

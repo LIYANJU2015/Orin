@@ -109,6 +109,7 @@ public class AlbumDetailActivity extends AbsSlidingMusicPanelActivity implements
     private Spanned wiki;
     private MaterialDialog wikiDialog;
     private LastFMRestClient lastFMRestClient;
+    private Bundle extrasBundle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,6 +124,8 @@ public class AlbumDetailActivity extends AbsSlidingMusicPanelActivity implements
         setUpObservableListViewParams();
         setUpToolBar();
         setUpViews();
+
+        extrasBundle = getIntent().getExtras();
 
         getSupportLoaderManager().initLoader(LOADER_ID, getIntent().getExtras(), this);
     }
@@ -452,7 +455,16 @@ public class AlbumDetailActivity extends AbsSlidingMusicPanelActivity implements
 
     @Override
     public Loader<Album> onCreateLoader(int id, Bundle args) {
-        return new AsyncAlbumLoader(this, args.getInt(EXTRA_ALBUM_ID));
+        try {
+            if (args != null) {
+                return new AsyncAlbumLoader(this, args.getInt(EXTRA_ALBUM_ID));
+            } else {
+                return new AsyncAlbumLoader(this, extrasBundle.getInt(EXTRA_ALBUM_ID));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override

@@ -7,6 +7,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.media.Rating;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Build;
@@ -48,6 +49,7 @@ import com.bumptech.glide.Glide;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.kabouzeid.appthemehelper.util.ATHUtil;
 import com.kabouzeid.appthemehelper.util.NavigationViewUtil;
+import com.rating.RatingActivity;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.vincan.medialoader.DefaultConfigFactory;
 import com.vincan.medialoader.MediaLoader;
@@ -117,6 +119,8 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
 
         AdModule.getInstance().getAdMob().initInterstitialAd();
         AdModule.getInstance().getAdMob().requestNewInterstitial();
+
+        isShowRating = PreferenceUtil.getInstance(this).isShowRating();
     }
 
     private void setMusicChooser(int key) {
@@ -162,6 +166,35 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
             if (!hasPermissions()) {
                 requestPermissions();
             }
+        }
+    }
+
+    private boolean isShowRating = false;
+    private boolean isShow = false;
+    @Override
+    public void onBackPressed() {
+        if (isShow) {
+            return;
+        }
+
+        if (isShowRating) {
+            isShow = true;
+            Util.runSingleThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    isShow = false;
+                    isShowRating = false;
+                    PreferenceUtil.getInstance(getApplicationContext()).notShowRating();
+                }
+            });
+            RatingActivity.launch(this);
+        } else {
+            super.onBackPressed();
         }
     }
 

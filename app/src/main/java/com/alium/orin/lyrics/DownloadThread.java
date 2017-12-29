@@ -172,46 +172,51 @@ public class DownloadThread extends AsyncTask<Void, Void, Lyrics> {
     }
 
     public Lyrics run(String params[]) {
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        try {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-        //test
+            //test
 //        params[0] = "u2band";
 //        params[1] = "discotheque";
-        Lyrics lyrics;
-        String artist = null;
-        String title = null;
-        String url = null;
-        switch (params.length) {
-            case 3: // URL + tags
-                artist = params[1];
-                title = params[2];
-            case 1: // URL
-                url = params[0];
-                lyrics = download(url, artist, title);
-                break;
-            default: // just tags
-                artist = params[0];
-                title = params[1];
-                lyrics = download(params[0], params[1]);
-        }
-        if (lyrics.getFlag() != Lyrics.POSITIVE_RESULT) {
-            String[] correction = correctTags(artist, title);
-            if (!(correction[0].equals(artist) && correction[1].equals(title)) || url != null) {
-                lyrics = download(correction[0], correction[1]);
-                lyrics.setOriginalArtist(artist);
-                lyrics.setOriginalTitle(title);
+            Lyrics lyrics;
+            String artist = null;
+            String title = null;
+            String url = null;
+            switch (params.length) {
+                case 3: // URL + tags
+                    artist = params[1];
+                    title = params[2];
+                case 1: // URL
+                    url = params[0];
+                    lyrics = download(url, artist, title);
+                    break;
+                default: // just tags
+                    artist = params[0];
+                    title = params[1];
+                    lyrics = download(params[0], params[1]);
             }
-        }
-        if (lyrics.getArtist() == null) {
-            if (artist != null) {
-                lyrics.setArtist(artist);
-                lyrics.setTitle(title);
-            } else {
-                lyrics.setArtist("");
-                lyrics.setTitle("");
+            if (lyrics.getFlag() != Lyrics.POSITIVE_RESULT) {
+                String[] correction = correctTags(artist, title);
+                if (!(correction[0].equals(artist) && correction[1].equals(title)) || url != null) {
+                    lyrics = download(correction[0], correction[1]);
+                    lyrics.setOriginalArtist(artist);
+                    lyrics.setOriginalTitle(title);
+                }
             }
+            if (lyrics.getArtist() == null) {
+                if (artist != null) {
+                    lyrics.setArtist(artist);
+                    lyrics.setTitle(title);
+                } else {
+                    lyrics.setArtist("");
+                    lyrics.setTitle("");
+                }
+            }
+            return lyrics;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return lyrics;
+        return null;
     }
 
     public static String[] correctTags(String artist, String title) {

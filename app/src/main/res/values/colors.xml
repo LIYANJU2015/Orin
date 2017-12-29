@@ -16,4 +16,7 @@
     <color name="colorSubTextWhite">#b3ffffff</color>
     <color name="colorPrimaryTextWhite">#ffffffff</color>
     <color name="colorAccentReal">@color/mi_icon_color_dark</color>
+
+    <color name="rating_btn_normal_color">#ff00ba90</color>
+    <color name="rating_btn_press_color">#CC00ba90</color>
 </resources>

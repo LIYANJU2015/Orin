@@ -331,7 +331,6 @@ public class YouTubePlayerActivity extends AbsBaseActivity {
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     public static final void clearWebView(WebView m) {

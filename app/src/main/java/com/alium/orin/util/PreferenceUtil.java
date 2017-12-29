@@ -444,6 +444,16 @@ public final class PreferenceUtil {
         editor.apply();
     }
 
+    public void notShowRating() {
+        final SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean("notShowRating", false);
+        editor.apply();
+    }
+
+    public boolean isShowRating() {
+        return mPreferences.getBoolean("notShowRating", true);
+    }
+
     public int getReportDeepLinkCount() {
         return mPreferences.getInt("DeepLinkCount", 0);
     }
