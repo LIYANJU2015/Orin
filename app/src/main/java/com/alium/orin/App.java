@@ -109,6 +109,7 @@ public class App extends MultiDexApplication implements AdModule.AdCallBack{
                         public void onDeferredAppLinkDataFetched(AppLinkData appLinkData) {
                             PreferenceUtil.getInstance(sContext).setReportDeepLinkCount(fetchCount + 1);
                             LogUtil.v("xx", " onDeferredAppLinkDataFetched>>>>");
+                            //musicplus://mymusic/6666
                             if (appLinkData != null && appLinkData.getTargetUri() != null) {
                                 LogUtil.v("xx", " onDeferredAppLinkDataFetched111>>>>");
                                 String deepLinkStr = appLinkData.getTargetUri().toString();
