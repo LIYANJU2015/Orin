@@ -572,7 +572,11 @@ public class ArtistDetailActivity extends AbsSlidingMusicPanelActivity implement
 
     @Override
     public Loader<Artist> onCreateLoader(int id, Bundle args) {
-        return new AsyncArtistDataLoader(this, args.getInt(EXTRA_ARTIST_ID));
+        if (args != null) {
+            return new AsyncArtistDataLoader(this, args.getInt(EXTRA_ARTIST_ID));
+        } else {
+            return null;
+        }
     }
 
     @Override

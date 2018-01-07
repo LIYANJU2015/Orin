@@ -227,7 +227,11 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                     playList.add(contentsBean);
                     MusicPlayerRemote.openQueue(playList, 0, true);
 
-                    AdModule.getInstance().getAdMob().showInterstitialAd();
+                    try {
+                        AdModule.getInstance().getAdMob().showInterstitialAd();
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
 
                     StatReportUtils.trackCustomEvent("search_page", "listItem click");
                     break;

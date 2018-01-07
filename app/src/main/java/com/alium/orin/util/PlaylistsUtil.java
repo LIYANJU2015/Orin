@@ -119,8 +119,12 @@ public class PlaylistsUtil {
             }
 
             if (showToastOnFinish) {
-                Toast.makeText(context, context.getResources().getString(
-                        R.string.inserted_x_songs_into_playlist_x, size, getNameForPlaylist(context, playlistId)), Toast.LENGTH_SHORT).show();
+                try {
+                    Toast.makeText(context, context.getResources().getString(
+                            R.string.inserted_x_songs_into_playlist_x, size, getNameForPlaylist(context, playlistId)), Toast.LENGTH_SHORT).show();
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
             }
         } catch (SecurityException ignored) {
         }

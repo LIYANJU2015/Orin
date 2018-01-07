@@ -298,27 +298,31 @@ public class AlbumDetailActivity extends AbsSlidingMusicPanelActivity implements
                 .enqueue(new Callback<LastFmAlbum>() {
                     @Override
                     public void onResponse(@NonNull Call<LastFmAlbum> call, @NonNull Response<LastFmAlbum> response) {
-                        final LastFmAlbum lastFmAlbum = response.body();
-                        if (lastFmAlbum != null && lastFmAlbum.getAlbum() != null && lastFmAlbum.getAlbum().getWiki() != null) {
-                            final String wikiContent = lastFmAlbum.getAlbum().getWiki().getContent();
-                            if (wikiContent != null && !wikiContent.trim().isEmpty()) {
-                                wiki = Html.fromHtml(wikiContent);
+                        try {
+                            final LastFmAlbum lastFmAlbum = response.body();
+                            if (lastFmAlbum != null && lastFmAlbum.getAlbum() != null && lastFmAlbum.getAlbum().getWiki() != null) {
+                                final String wikiContent = lastFmAlbum.getAlbum().getWiki().getContent();
+                                if (wikiContent != null && !wikiContent.trim().isEmpty()) {
+                                    wiki = Html.fromHtml(wikiContent);
+                                }
                             }
-                        }
 
-                        // If the "lang" parameter is set and no wiki is given, retry with default language
-                        if (wiki == null && lang != null) {
-                            loadWiki(null);
-                            return;
-                        }
-
-                        if (!Util.isAllowedToDownloadMetadata(AlbumDetailActivity.this)) {
-                            if (wiki != null) {
-                                wikiDialog.setContent(wiki);
-                            } else {
-                                wikiDialog.dismiss();
-                                Toast.makeText(AlbumDetailActivity.this, getResources().getString(R.string.wiki_unavailable), Toast.LENGTH_SHORT).show();
+                            // If the "lang" parameter is set and no wiki is given, retry with default language
+                            if (wiki == null && lang != null) {
+                                loadWiki(null);
+                                return;
                             }
+
+                            if (wikiDialog != null && !Util.isAllowedToDownloadMetadata(AlbumDetailActivity.this)) {
+                                if (wiki != null) {
+                                    wikiDialog.setContent(wiki);
+                                } else {
+                                    wikiDialog.dismiss();
+                                    Toast.makeText(AlbumDetailActivity.this, getResources().getString(R.string.wiki_unavailable), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        } catch (Throwable e) {
+                            e.printStackTrace();
                         }
                     }
 

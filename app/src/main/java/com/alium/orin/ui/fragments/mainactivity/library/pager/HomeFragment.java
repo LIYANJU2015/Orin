@@ -108,7 +108,9 @@ public class HomeFragment extends AbsMusicServiceFragment {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                loading_mb.setVisibility(View.VISIBLE);
+                if (loading_mb != null) {
+                    loading_mb.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
@@ -143,6 +145,10 @@ public class HomeFragment extends AbsMusicServiceFragment {
             @Override
             protected void onPostExecute(YouTubeModel youTubeModel) {
                 super.onPostExecute(youTubeModel);
+                if (!isAdded()) {
+                    return;
+                }
+
                 if (youTubeModel == null) {
                     youTubeModel = App.sYoutubeModel;
                 }

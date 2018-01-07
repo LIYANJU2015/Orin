@@ -266,16 +266,6 @@
             </intent-filter>
         </activity>
 
-        <provider
-            android:name="com.tencent.mid.api.MidProvider"
-            android:authorities="com.gomusic.musicplus.TENCENT.MID.V3"
-            tools:replace="android:authorities"
-            android:exported="true" >
-        </provider>
-        <meta-data tools:replace="android:value" android:name="TA_APPKEY" android:value="A77CEYD9IS8G"/>
-        <!-- 请将value改为app发布对应的渠道，不同的发布渠道使用不同的名字 < -->
-        <meta-data tools:replace="android:value" android:name="InstallChannel" android:value="google_play"/>
-        <!-- 注意：若填写的渠道为纯数字字符串类型，请不要超过int表示的范围！ < -->
         <meta-data
             android:name="BUGLY_APPID"
             android:value="c80c37a36a" />

@@ -113,7 +113,9 @@ public class FlatPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
         loadingPB.getHandler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                loadingPB.setVisibility(View.INVISIBLE);
+                if (loadingPB != null) {
+                    loadingPB.setVisibility(View.INVISIBLE);
+                }
             }
         }, 500);
 

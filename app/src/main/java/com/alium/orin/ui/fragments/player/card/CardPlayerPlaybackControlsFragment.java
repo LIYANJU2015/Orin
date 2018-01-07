@@ -147,7 +147,10 @@ public class CardPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
         playerPB.getHandler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                playerPB.setVisibility(View.INVISIBLE);
+                if (playerPB != null) {
+                    playerPB.setVisibility(View.INVISIBLE);
+                }
+
             }
         }, 500);
 

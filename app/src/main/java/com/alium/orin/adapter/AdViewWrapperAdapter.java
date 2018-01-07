@@ -52,14 +52,19 @@ public class AdViewWrapperAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     @Override
     public int getItemViewType(int position) {
-        int viewType = findAdViewTypeByPostion(position);
-        if (viewType != -1) {
-            return viewType;
+        try {
+            int viewType = findAdViewTypeByPostion(position);
+            if (viewType != -1) {
+                return viewType;
+            }
+
+            int count = getAdViewCountBeforeByPostion(position);
+
+            return mInnerAdapter.getItemViewType(position - count);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        int count = getAdViewCountBeforeByPostion(position);
-
-        return mInnerAdapter.getItemViewType(position - count);
+        return 0;
     }
 
     public int getAdViewCountBeforeByPostion(int postion) {
@@ -85,18 +90,27 @@ public class AdViewWrapperAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (mADViews.get(viewType) != null) {
-            return ViewHolder.createViewHolder(parent.getContext(), mADViews.get(viewType).adView);
+        try {
+            if (mADViews.get(viewType) != null) {
+                return ViewHolder.createViewHolder(parent.getContext(), mADViews.get(viewType).adView);
 
+            }
+            return mInnerAdapter.onCreateViewHolder(parent, viewType);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return mInnerAdapter.onCreateViewHolder(parent, viewType);
+        return null;
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (findAdViewTypeByPostion(position) == -1) {
-            int count = getAdViewCountBeforeByPostion(position);
-            mInnerAdapter.onBindViewHolder(holder, position - count);
+        try {
+            if (findAdViewTypeByPostion(position) == -1) {
+                int count = getAdViewCountBeforeByPostion(position);
+                mInnerAdapter.onBindViewHolder(holder, position - count);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

@@ -117,8 +117,15 @@ public class ShuffleButtonSongAdapter extends SongAdapter {
 
         @Override
         protected Song getSong() {
-            if (getItemViewType() == SHUFFLE_BUTTON) return Song.EMPTY_SONG;
-            return dataSet.get(getAdapterPosition() - 1);
+            if (getItemViewType() == SHUFFLE_BUTTON) {
+                return Song.EMPTY_SONG;
+            }
+            try {
+                return dataSet.get(getAdapterPosition() - 1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return Song.EMPTY_SONG;
         }
 
         @Override

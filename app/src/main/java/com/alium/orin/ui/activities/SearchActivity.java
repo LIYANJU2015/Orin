@@ -168,7 +168,11 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                onBackPressed();
+                try {
+                    onBackPressed();
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
                 return false;
             }
         });

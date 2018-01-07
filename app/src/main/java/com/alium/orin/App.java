@@ -27,8 +27,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.tencent.bugly.crashreport.CrashReport;
-import com.tencent.stat.MtaSDkException;
-import com.tencent.stat.StatService;
+
 import com.vincan.medialoader.DefaultConfigFactory;
 import com.vincan.medialoader.MediaLoader;
 import com.vincan.medialoader.MediaLoaderConfig;
@@ -89,14 +88,6 @@ public class App extends MultiDexApplication implements AdModule.AdCallBack{
 
         CrashReport.initCrashReport(getApplicationContext());
 
-        String appkey = "A77CEYD9IS8G";
-        try {
-            StatService.startStatService(this, appkey,
-                    com.tencent.stat.common.StatConstants.VERSION);
-        } catch (MtaSDkException e) {
-            e.printStackTrace();
-        }
-
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
 
@@ -153,7 +144,7 @@ public class App extends MultiDexApplication implements AdModule.AdCallBack{
 
     @Override
     public String getBannerAdId() {
-        return null;
+        return "ca-app-pub-9880857526519562/6984893216";
     }
 
     @Override

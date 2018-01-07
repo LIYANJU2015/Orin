@@ -273,10 +273,14 @@ public class EqualizerActivity extends AbsMusicServiceActivity {
     }
 
     private void closeEqualizer() {
-        sEqualizerModel.setEqualizerEnabled(false);
-        mEqualizer.usePreset((short) 0);
-        bassBoost.setStrength((short) (((float) 1000 / 19) * (1)));
-        presetReverb.setPreset((short) 0);
+        try {
+            sEqualizerModel.setEqualizerEnabled(false);
+            mEqualizer.usePreset((short) 0);
+            bassBoost.setStrength((short) (((float) 1000 / 19) * (1)));
+            presetReverb.setPreset((short) 0);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

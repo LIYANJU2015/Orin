@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.admodule.AdModule;
+import com.admodule.admob.AdMobBanner;
 import com.alium.orin.R;
 import com.alium.orin.adapter.AdViewWrapperAdapter;
 import com.alium.orin.helper.MusicPlayerRemote;
@@ -27,6 +28,7 @@ import com.alium.orin.util.StatReportUtils;
 import com.bumptech.glide.Glide;
 import com.facebook.ads.AdChoicesView;
 import com.facebook.ads.NativeAd;
+import com.google.android.gms.ads.AdListener;
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
 import com.kabouzeid.appthemehelper.ThemeStore;
@@ -92,6 +94,8 @@ public class SoundCloudListActivity extends AbsSlidingMusicPanelActivity {
         setUpRecyclerView();
 
         setUpToolBar();
+
+        initAdBannerView();
     }
 
     private void setUpToolBar() {
@@ -115,6 +119,11 @@ public class SoundCloudListActivity extends AbsSlidingMusicPanelActivity {
     protected void onDestroy() {
         super.onDestroy();
         AdModule.getInstance().getFacebookAd().loadAd(true, "1305172892959949_1313403128803592");
+
+        if (adView != null) {
+            adView.destroy();
+            adView = null;
+        }
     }
 
     private AdViewWrapperAdapter adViewWrapperAdapter;
@@ -123,7 +132,7 @@ public class SoundCloudListActivity extends AbsSlidingMusicPanelActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         final GeneralItemAnimator animator = new RefactoredDefaultItemAnimator();
 
-        commonadapter = new CommonAdapter<Song>(this,
+        CommonAdapter commonadapter = new CommonAdapter<Song>(this,
                 R.layout.item_list, mData) {
             @Override
             protected void convert(final ViewHolder holder, final Song song,
@@ -168,19 +177,59 @@ public class SoundCloudListActivity extends AbsSlidingMusicPanelActivity {
             }
         };
 
-        RecyclerView.Adapter adapter;
+        adViewWrapperAdapter = new AdViewWrapperAdapter(commonadapter);
+
         NativeAd nativeAd = AdModule.getInstance().getFacebookAd().getNativeAd();
-        if (nativeAd != null && nativeAd.isAdLoaded()) {
-            adViewWrapperAdapter = new AdViewWrapperAdapter(commonadapter);
+        if (nativeAd != null && nativeAd.isAdLoaded() && mData.size() > 3
+                && !adViewWrapperAdapter.isAddAdView()) {
             adViewWrapperAdapter.addAdView(22, new AdViewWrapperAdapter.
                     AdViewItem(setUpNativeAdView(nativeAd), 1));
-            adapter = adViewWrapperAdapter;
             StatReportUtils.trackCustomEvent("home_list_page", "ad show");
-        } else {
-            adapter = commonadapter;
         }
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(adViewWrapperAdapter);
         recyclerView.setItemAnimator(animator);
+    }
+
+    private AdMobBanner adView;
+
+    private void initAdBannerView() {
+        adView = AdModule.getInstance().getAdMob().createBannerAdView();
+        adView.setAdListener(new AdListener(){
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                if (isFinishing() || adView == null) {
+                    return;
+                }
+
+                if (adViewWrapperAdapter != null && !adViewWrapperAdapter.isAddAdView()
+                        && adViewWrapperAdapter.getItemCount() > 3) {
+                    adView.getAdView().setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
+                            RecyclerView.LayoutParams.WRAP_CONTENT));
+                    adViewWrapperAdapter.addAdView(22, new AdViewWrapperAdapter.
+                            AdViewItem(adView.getAdView(), 1));
+
+                    adViewWrapperAdapter.notifyItemInserted(1);
+                }
+            }
+        });
+        adView.getAdView().loadAd(AdModule.getInstance().getAdMob().createAdRequest());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adView != null) {
+            adView.resume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (adView != null) {
+            adView.pause();
+        }
     }
 
     private View setUpNativeAdView(NativeAd nativeAd) {

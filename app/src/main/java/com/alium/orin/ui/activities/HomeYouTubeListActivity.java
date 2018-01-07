@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.admodule.AdModule;
+import com.admodule.admob.AdMobBanner;
 import com.alium.orin.R;
 import com.alium.orin.adapter.AdViewWrapperAdapter;
 import com.alium.orin.ui.activities.base.AbsBaseActivity;
@@ -24,6 +25,7 @@ import com.alium.orin.youtube.YouTubeModel;
 import com.bumptech.glide.Glide;
 import com.facebook.ads.AdChoicesView;
 import com.facebook.ads.NativeAd;
+import com.google.android.gms.ads.AdListener;
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
 import com.kabouzeid.appthemehelper.ThemeStore;
@@ -93,6 +95,8 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
         setUpToolBar();
 
         setUpRecyclerView();
+
+        initAdBannerView();
     }
 
     @Override
@@ -116,6 +120,11 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
         if ((System.currentTimeMillis() - PreferenceUtil.getInstance(this).getAdProtactTime()) >= 1000*60*10) {
             AdModule.getInstance().getFacebookAd().loadAd(true, "1305172892959949_1313403128803592");
             AdModule.getInstance().getAdMob().showInterstitialAd();
+        }
+
+        if (adView != null) {
+            adView.destroy();
+            adView = null;
         }
     }
 
@@ -148,21 +157,63 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
             }
         };
 
-        RecyclerView.Adapter adapter;
+        adViewWrapperAdapter = new AdViewWrapperAdapter(commonadapter);
+
         NativeAd nativeAd = AdModule.getInstance().getFacebookAd().getNativeAd();
 
         boolean isCan = (System.currentTimeMillis() -
-                PreferenceUtil.getInstance(this).getAdProtactTime()) >= 1000*60*10;
-        if (isCan && nativeAd != null && nativeAd.isAdLoaded()) {
-            adViewWrapperAdapter = new AdViewWrapperAdapter(commonadapter);
+                PreferenceUtil.getInstance(this).getAdProtactTime()) >= 1000*60*7;
+        if (isCan && nativeAd != null && nativeAd.isAdLoaded() && mData.size() > 3
+                && !adViewWrapperAdapter.isAddAdView()) {
             adViewWrapperAdapter.addAdView(22, new AdViewWrapperAdapter.
                     AdViewItem(setUpNativeAdView(nativeAd), 1));
-            adapter = adViewWrapperAdapter;
-        } else {
-            adapter = commonadapter;
         }
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(adViewWrapperAdapter);
         recyclerView.setItemAnimator(animator);
+    }
+
+    private AdMobBanner adView;
+
+    private void initAdBannerView() {
+        adView = AdModule.getInstance().getAdMob().createBannerAdView();
+        adView.setAdListener(new AdListener(){
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                if (isFinishing() || adView == null) {
+                    return;
+                }
+
+                boolean isCan = (System.currentTimeMillis() -
+                        PreferenceUtil.getInstance(getApplicationContext()).getAdProtactTime()) >= 1000*60*7;
+                if (isCan && adViewWrapperAdapter != null && !adViewWrapperAdapter.isAddAdView()
+                        && adViewWrapperAdapter.getItemCount() > 3) {
+                    adView.getAdView().setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
+                            RecyclerView.LayoutParams.WRAP_CONTENT));
+                    adViewWrapperAdapter.addAdView(22, new AdViewWrapperAdapter.
+                            AdViewItem(adView.getAdView(), 1));
+
+                    adViewWrapperAdapter.notifyItemInserted(1);
+                }
+            }
+        });
+        adView.getAdView().loadAd(AdModule.getInstance().getAdMob().createAdRequest());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adView != null) {
+            adView.resume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (adView != null) {
+            adView.pause();
+        }
     }
 
     @Override
