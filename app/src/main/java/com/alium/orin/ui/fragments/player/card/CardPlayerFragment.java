@@ -578,18 +578,22 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
 
         @Override
         public void setUpPanelAndAlbumCoverHeight() {
-            WidthFitSquareLayout albumCoverContainer = (WidthFitSquareLayout) fragment.getView().findViewById(R.id.album_cover_container);
-            int topMargin = fragment.getResources().getDimensionPixelSize(R.dimen.status_bar_padding);
+            try {
+                WidthFitSquareLayout albumCoverContainer = (WidthFitSquareLayout) fragment.getView().findViewById(R.id.album_cover_container);
+                int topMargin = fragment.getResources().getDimensionPixelSize(R.dimen.status_bar_padding);
 
-            final int availablePanelHeight = fragment.slidingUpPanelLayout.getHeight() - fragment.getView().findViewById(R.id.player_content).getHeight() + topMargin;
-            final int minPanelHeight = (int) ViewUtil.convertDpToPixel(72 + 24, fragment.getResources()) + topMargin;
-            if (availablePanelHeight < minPanelHeight) {
-                albumCoverContainer.getLayoutParams().height = albumCoverContainer.getHeight() - (minPanelHeight - availablePanelHeight);
-                albumCoverContainer.forceSquare(false);
+                final int availablePanelHeight = fragment.slidingUpPanelLayout.getHeight() - fragment.getView().findViewById(R.id.player_content).getHeight() + topMargin;
+                final int minPanelHeight = (int) ViewUtil.convertDpToPixel(72 + 24, fragment.getResources()) + topMargin;
+                if (availablePanelHeight < minPanelHeight) {
+                    albumCoverContainer.getLayoutParams().height = albumCoverContainer.getHeight() - (minPanelHeight - availablePanelHeight);
+                    albumCoverContainer.forceSquare(false);
+                }
+                fragment.slidingUpPanelLayout.setPanelHeight(Math.max(minPanelHeight, availablePanelHeight));
+
+                ((AbsSlidingMusicPanelActivity) fragment.getActivity()).setAntiDragView(fragment.slidingUpPanelLayout.findViewById(R.id.player_panel));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            fragment.slidingUpPanelLayout.setPanelHeight(Math.max(minPanelHeight, availablePanelHeight));
-
-            ((AbsSlidingMusicPanelActivity) fragment.getActivity()).setAntiDragView(fragment.slidingUpPanelLayout.findViewById(R.id.player_panel));
         }
 
         @Override

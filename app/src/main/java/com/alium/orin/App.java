@@ -18,6 +18,7 @@ import com.alium.orin.soundcloud.HomeSoundDeserializer;
 import com.alium.orin.util.FacebookReport;
 import com.alium.orin.util.LogUtil;
 import com.alium.orin.util.PreferenceUtil;
+import com.alium.orin.util.Util;
 import com.alium.orin.youtube.YouTubeModel;
 import com.alium.orin.youtube.YouTubeModelDeseializer;
 import com.facebook.FacebookSdk;
@@ -75,6 +76,8 @@ public class App extends MultiDexApplication implements AdModule.AdCallBack{
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             new DynamicShortcutManager(this).initDynamicShortcuts();
         }
+
+        Util.initRecommend();
 
         ThemeStore.editTheme(this)
                 .primaryColor(ContextCompat.getColor(this, R.color.colorPrimary))

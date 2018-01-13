@@ -250,7 +250,12 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public boolean isPlaying() {
-        return mIsInitialized && mCurrentMediaPlayer.isPlaying();
+        try {
+            return mIsInitialized && mCurrentMediaPlayer.isPlaying();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**

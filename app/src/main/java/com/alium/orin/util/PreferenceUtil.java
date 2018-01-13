@@ -79,6 +79,14 @@ public final class PreferenceUtil {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
+    public boolean isShowRecomFAB() {
+        return mPreferences.getBoolean("recom_fab", true);
+    }
+
+    public void setNotShowRecomFAB() {
+        mPreferences.edit().putBoolean("recom_fab", false).apply();
+    }
+
     public static PreferenceUtil getInstance(@NonNull final Context context) {
         if (sInstance == null) {
             sInstance = new PreferenceUtil(context.getApplicationContext());

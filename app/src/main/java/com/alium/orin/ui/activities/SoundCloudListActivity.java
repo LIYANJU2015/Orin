@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 
 import com.admodule.AdModule;
 import com.admodule.admob.AdMobBanner;
+import com.alium.orin.App;
 import com.alium.orin.R;
 import com.alium.orin.adapter.AdViewWrapperAdapter;
 import com.alium.orin.helper.MusicPlayerRemote;
@@ -24,7 +26,10 @@ import com.alium.orin.helper.menu.SongMenuHelper;
 import com.alium.orin.model.Song;
 import com.alium.orin.ui.activities.base.AbsSlidingMusicPanelActivity;
 import com.alium.orin.ui.fragments.mainactivity.library.pager.SoundCloudFragment;
+import com.alium.orin.util.FacebookReport;
+import com.alium.orin.util.PreferenceUtil;
 import com.alium.orin.util.StatReportUtils;
+import com.alium.orin.util.Util;
 import com.bumptech.glide.Glide;
 import com.facebook.ads.AdChoicesView;
 import com.facebook.ads.NativeAd;
@@ -77,6 +82,8 @@ public class SoundCloudListActivity extends AbsSlidingMusicPanelActivity {
         overridePendingTransition(0, R.anim.slide_bottom_out);
     }
 
+    private FloatingActionButton mRecomFab;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,6 +103,28 @@ public class SoundCloudListActivity extends AbsSlidingMusicPanelActivity {
         setUpToolBar();
 
         initAdBannerView();
+
+        mRecomFab = (FloatingActionButton) findViewById(R.id.recom_fab);
+        mRecomFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mRecomFab.hide();
+                PreferenceUtil.getInstance(App.sContext).setNotShowRecomFAB();
+                mRecomFab.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Util.gotoGP(App.sContext, Util.sRecommendPageName);
+                    }
+                });
+                FacebookReport.logSentRcommClick();
+            }
+        });
+        if (PreferenceUtil.getInstance(App.sContext).isShowRecomFAB()
+                && !Util.checkRecommendExist(App.sContext, Util.sRecommendPageName)) {
+            mRecomFab.setVisibility(View.VISIBLE);
+        } else {
+            mRecomFab.setVisibility(View.GONE);
+        }
     }
 
     private void setUpToolBar() {

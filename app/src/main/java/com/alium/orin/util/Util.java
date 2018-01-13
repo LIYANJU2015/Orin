@@ -3,6 +3,8 @@ package com.alium.orin.util;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -10,6 +12,7 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.AttrRes;
 import android.support.annotation.ColorInt;
@@ -30,6 +33,8 @@ import com.kabouzeid.appthemehelper.util.TintHelper;
 import com.alium.orin.R;
 
 import java.net.URLDecoder;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,6 +45,50 @@ import java.util.concurrent.Executors;
 public class Util {
 
     public static ExecutorService sExecutorService = Executors.newSingleThreadExecutor();
+
+    public static final String RECOMMEND_PACKAGE_NAME1 = "com.gomusic.musicdownloader";
+    public static final String RECOMMEND_PACKAGE_NAME2 = "com.gomusic.freedownloader";
+    public static String sRecommendPageName = RECOMMEND_PACKAGE_NAME2;
+
+    public static void initRecommend() {
+        int i = new Random().nextInt(10);
+        if (i % 2 == 0) {
+            sRecommendPageName = RECOMMEND_PACKAGE_NAME1;
+        } else {
+            sRecommendPageName = RECOMMEND_PACKAGE_NAME2;
+        }
+
+    }
+
+    public static boolean checkRecommendExist(Context context, String packageName) {
+        List<PackageInfo> packages = context.getPackageManager().getInstalledPackages(0);
+        if (packages == null) {
+            return false;
+        }
+        for (PackageInfo packageInfo : packages) {
+            if (packageInfo.packageName.equals(packageName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void gotoGP(Context context, String packageName) {
+        try {
+            Intent launchIntent = new Intent();
+            launchIntent.setPackage("com.android.vending");
+            launchIntent.setData(Uri.parse("market://details?id=" + packageName));
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(launchIntent);
+        } catch (android.content.ActivityNotFoundException anfe) {
+            try {
+                context.startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("http://play.google.com/store/apps/details?id=" + packageName)));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
 
     public static void runSingleThread(Runnable runnable) {
         sExecutorService.execute(runnable);

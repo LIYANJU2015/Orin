@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -17,10 +18,13 @@ import android.widget.TextView;
 
 import com.admodule.AdModule;
 import com.admodule.admob.AdMobBanner;
+import com.alium.orin.App;
 import com.alium.orin.R;
 import com.alium.orin.adapter.AdViewWrapperAdapter;
 import com.alium.orin.ui.activities.base.AbsBaseActivity;
+import com.alium.orin.util.FacebookReport;
 import com.alium.orin.util.PreferenceUtil;
+import com.alium.orin.util.Util;
 import com.alium.orin.youtube.YouTubeModel;
 import com.bumptech.glide.Glide;
 import com.facebook.ads.AdChoicesView;
@@ -68,6 +72,8 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
         overridePendingTransition(0, R.anim.slide_bottom_out);
     }
 
+    private FloatingActionButton mRecomFab;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,6 +103,28 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
         setUpRecyclerView();
 
         initAdBannerView();
+
+        mRecomFab = (FloatingActionButton) findViewById(R.id.recom_fab);
+        mRecomFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mRecomFab.hide();
+                PreferenceUtil.getInstance(App.sContext).setNotShowRecomFAB();
+                mRecomFab.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Util.gotoGP(App.sContext, Util.sRecommendPageName);
+                    }
+                });
+                FacebookReport.logSentRcommClick();
+            }
+        });
+        if (PreferenceUtil.getInstance(App.sContext).isShowRecomFAB()
+                && !Util.checkRecommendExist(App.sContext, Util.sRecommendPageName)) {
+            mRecomFab.setVisibility(View.VISIBLE);
+        } else {
+            mRecomFab.setVisibility(View.GONE);
+        }
     }
 
     @Override

@@ -143,9 +143,14 @@ public class AlbumsFragment extends AbsLibraryPagerRecyclerViewCustomGridSizeFra
         Collections.sort(data, new Comparator<Album>() {
             @Override
             public int compare(Album lhs, Album rhs) {
-                if (lhs != null && rhs != null) {
-                    return lhs.getTitle().compareToIgnoreCase(rhs.getTitle());
-                } else {
+                try {
+                    if (lhs != null && rhs != null) {
+                        return lhs.getTitle().compareToIgnoreCase(rhs.getTitle());
+                    } else {
+                        return 0;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                     return 0;
                 }
             }

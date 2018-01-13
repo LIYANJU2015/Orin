@@ -11,6 +11,11 @@ import com.facebook.appevents.AppEventsLogger;
 
 public class FacebookReport {
 
+    public static void logSentRcommClick()  {
+        AppEventsLogger logger = AppEventsLogger.newLogger(App.sContext);
+        logger.logEvent("app_recomm_click");
+    }
+
     public static void logSentReferrer(String referrer)  {
         AppEventsLogger logger = AppEventsLogger.newLogger(App.sContext);
         Bundle bundle = new Bundle();
