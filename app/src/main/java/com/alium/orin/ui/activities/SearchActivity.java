@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.admodule.AdModule;
 import com.alium.orin.loader.AlbumLoader;
 import com.alium.orin.loader.ArtistLoader;
 import com.alium.orin.soundcloud.SoundCloudClient;
@@ -235,6 +236,10 @@ public class SearchActivity extends AbsMusicServiceActivity implements SearchVie
             mQueryAsyncTask.cancel(true);
         }
         mPaginate.unbind();
+
+        if (adapter != null && adapter.getItemCount() > 0) {
+            AdModule.getInstance().getAdMob().showInterstitialAd();
+        }
     }
 
     private AsyncTask mQueryAsyncTask;

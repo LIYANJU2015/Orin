@@ -145,8 +145,8 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if ((System.currentTimeMillis() - PreferenceUtil.getInstance(this).getAdProtactTime()) >= 1000*60*10) {
-            AdModule.getInstance().getFacebookAd().loadAd(true, "1305172892959949_1313403128803592");
+        AdModule.getInstance().getFacebookAd().loadAd(true, "1305172892959949_1313403128803592");
+        if (App.isCanShowAd() && adViewWrapperAdapter != null && !adViewWrapperAdapter.isAddAdView()) {
             AdModule.getInstance().getAdMob().showInterstitialAd();
         }
 
@@ -189,9 +189,7 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
 
         NativeAd nativeAd = AdModule.getInstance().getFacebookAd().getNativeAd();
 
-        boolean isCan = (System.currentTimeMillis() -
-                PreferenceUtil.getInstance(this).getAdProtactTime()) >= 1000*60*7;
-        if (isCan && nativeAd != null && nativeAd.isAdLoaded() && mData.size() > 3
+        if (App.isCanShowAd() && nativeAd != null && nativeAd.isAdLoaded() && mData.size() > 3
                 && !adViewWrapperAdapter.isAddAdView()) {
             adViewWrapperAdapter.addAdView(22, new AdViewWrapperAdapter.
                     AdViewItem(setUpNativeAdView(nativeAd), 1));
@@ -212,9 +210,7 @@ public class HomeYouTubeListActivity extends AbsBaseActivity {
                     return;
                 }
 
-                boolean isCan = (System.currentTimeMillis() -
-                        PreferenceUtil.getInstance(getApplicationContext()).getAdProtactTime()) >= 1000*60*7;
-                if (isCan && adViewWrapperAdapter != null && !adViewWrapperAdapter.isAddAdView()
+                if (App.isCanShowAd() && adViewWrapperAdapter != null && !adViewWrapperAdapter.isAddAdView()
                         && adViewWrapperAdapter.getItemCount() > 3) {
                     adView.getAdView().setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
                             RecyclerView.LayoutParams.WRAP_CONTENT));

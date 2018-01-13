@@ -37,6 +37,7 @@ import com.vincan.medialoader.data.file.naming.Md5FileNameCreator;
 import org.eclipse.egit.github.core.client.GsonUtils;
 
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.Locale;
 
 import ren.yale.android.cachewebviewlib.utils.NetworkUtils;
@@ -116,6 +117,13 @@ public class App extends MultiDexApplication implements AdModule.AdCallBack{
         if (PreferenceUtil.getInstance(this).getAdProtactTime() == 0) {
             PreferenceUtil.getInstance(this).saveAdProtactTime();
         }
+    }
+
+    public static boolean isCanShowAd() {
+        int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+        int month = Calendar.getInstance().get(Calendar.MONTH);
+        String dateStr = String.valueOf(month) + String.valueOf(day);
+        return !dateStr.equals(Calendar.JANUARY + "13");
     }
 
     private int fetchCount;
